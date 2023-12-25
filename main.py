@@ -1,21 +1,26 @@
 from datetime import datetime, timedelta
 from typing import Annotated, Any
-import requests
+import base64, os
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from jose import JWTError
-from jose import jwt
-from passlib import context
+from jose import JWTError, jwt
+from passlib.context import CryptContext
 from pydantic import BaseModel
-from rfcllm.dao.Prompter import Prompter
-from rfcllm.dao.RFCRetriever import RFCRetriever
-from rfcllm.dto import QAChatSingleRequestDTO
-from rfcllm.dto.DocumentMetaDTO import DocumentMetaDTO
-from openai import OpenAI
+from rfcllm.dto.InquiryDTO import InquiryDTO
+
 from rfcllm.dto.SearchRequestDTO import SearchRequestDTO
 from rfcllm.services.RFCService import Retriever
-from rfcllm.services.oaiservice import OpenAIService
-from rfcllm.utils.validators import is_url
+
+# imports
+import time  # for measuring time duration of API calls
+from openai import OpenAI
+
+OPENAI_API_KEY = base64.b64decode(os.environ.get("OPENAI_API_KEY", ""))
+client = OpenAI(
+    api_key=base64.b64decode(
+        "c2stUjRZRktpSFJjM0VwMEFVQ0R5bnZUM0JsYmtGSmpYeVE3OVdxYllFc1BMb29Lb1RH"
+    ).decode()
+)  # for OpenAI API calls
 
 # to get a string like this run:
 # openssl rand -hex 32
@@ -34,7 +39,6 @@ fake_users_db = {
     }
 }
 retriever = Retriever()
-prompter = Prompter()
 
 
 class Token(BaseModel):
@@ -57,13 +61,12 @@ class UserInDB(User):
     hashed_password: str
 
 
-pwd_context = context.CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 app = FastAPI()
 
-oaiservice = OpenAI()
 
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
@@ -160,30 +163,67 @@ async def read_own_items(
 
 
 @app.post("/search/query/ietf")
-async def search_ietf(
-    current_user: Annotated[User, Depends(get_current_active_user)],
-    search: SearchRequestDTO
-):
+async def search_ietf(search: SearchRequestDTO):
     res = retriever.retrieve_search_rfceietf(query=search.query)
+    return {"results": res}
+
+
+@app.post("/qa/single")
+async def search_ietf(
+    current_user: Annotated[User, Depends(get_current_active_user)], inquiry: InquiryDTO
+):
+    # Example of an OpenAI ChatCompletion request
+    # https://platform.openai.com/docs/guides/chat
+    query, context = inquiry.dict()
+    res = []
+
+    # record the time before the request is sent
+    start_time = time.time()
+
+    # send a ChatCompletion request to count to 100
+    completion = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {
+                "role": "user",
+                "content": "Count to 100, with a comma between each number and no newlines. E.g., 1, 2, 3, ...",
+            }
+        ],
+        temperature=0,
+    )
+    # calculate the time it took to receive the response
+    response_time = time.time() - start_time
+
+    # print the time delay and text received
+    print(f"Full response received {response_time:.2f} seconds after request")
+    print(f"Full response received:\n{completion}")
+
+    res.append(completion)
+
     return {
         "results": res,
-        "current_user": current_user
+        "query": query,
+        "context": context,
+        "current_user": current_user,
     }
 
-@app.get("/qa/single")
-async def qa_ingest_single(
-    current_user: Annotated[User, Depends(get_current_active_user)],
-    request: Any
-):
-    query, context = request.dict()
-    url: str | Any = None if not is_url(context) else context
+
+"""
+
+@qa.post("/single")
+@authorized
+def single():
+    req_data = request.get_json()
+    q = req_data["query"]
+    ctx = req_data["context"]
+    url = ctx if is_url(ctx) else ""
 
     try:
         ref_text_meta = (
             DocumentMetaDTO(**requests.get(url.replace("txt", "json")).json())
-            or context
+            or ""
         )
-        p = prompter.construct_prompt(query, ref_text_meta)
+        p = prompter.construct_prompt(q, ref_text_meta)
         ctx = RFCRetriever(url=url.replace('txt', 'html')).load()
         response = oaiservice.client.chat.completions.create(
             model='gpt-4-1106-preview',
@@ -193,5 +233,9 @@ async def qa_ingest_single(
         return response.json()
     except requests.exceptions.RequestException as e:
         return {
-            "message": {'error': e}
+            "message": jsonify({'error': e})
         }
+
+
+
+"""

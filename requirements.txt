@@ -2,5 +2,3 @@ uvicorn
 requests
 beautifulsoup4
 bs4
-python-jose
-openai
