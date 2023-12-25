@@ -7,6 +7,9 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
 
+from rfcllm.dto.SearchRequestDTO import SearchRequestDTO
+from rfcllm.services.RFCService import Retriever
+
 # to get a string like this run:
 # openssl rand -hex 32
 SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
@@ -23,6 +26,7 @@ fake_users_db = {
         "disabled": False,
     }
 }
+retriever = Retriever()
 
 
 class Token(BaseModel):
@@ -144,3 +148,15 @@ async def read_own_items(
     current_user: Annotated[User, Depends(get_current_active_user)]
 ):
     return [{"item_id": "Foo", "owner": current_user.username}]
+
+
+@app.post("/search/query/ietf")
+async def search_ietf(
+    search: SearchRequestDTO 
+):
+    res = retriever.retrieve_search_rfceietf(query=search.query)
+    return {
+        "results": res       
+    }
+
+

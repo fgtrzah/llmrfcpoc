@@ -1,1 +1,4 @@
 uvicorn
+requests
+beautifulsoup4
+bs4
