@@ -152,11 +152,13 @@ async def read_own_items(
 
 @app.post("/search/query/ietf")
 async def search_ietf(
-    search: Annotated[SearchRequestDTO, Depends(get_current_active_user)]
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    search: SearchRequestDTO
 ):
     res = retriever.retrieve_search_rfceietf(query=search.query)
     return {
-        "results": res       
+        "results": res,
+        "current_user": current_user
     }
 
 @app.get("/qa/ingest/single")
