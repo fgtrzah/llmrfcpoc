@@ -1,7 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
 
-
 class RFCRetriever(object):
     def __init__(self, url="") -> None:
         self.url = url

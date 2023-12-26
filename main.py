@@ -1,11 +1,18 @@
 from datetime import datetime, timedelta
 from typing import Annotated, Any
 import base64, os
+from urllib.parse import urlparse
 from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi.responses import StreamingResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from flask import jsonify
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
+import requests
+from rfcllm.config.settings import RFCEP
+from rfcllm.core import Prompter as prompter, RFCRetriever as rfcretriever
+from rfcllm.dto.DocumentMetaDTO import DocumentMetaDTO
 from rfcllm.dto.InquiryDTO import InquiryDTO
 
 from rfcllm.dto.SearchRequestDTO import SearchRequestDTO
@@ -15,12 +22,16 @@ from rfcllm.services.RFCService import Retriever
 import time  # for measuring time duration of API calls
 from openai import OpenAI
 
+from rfcllm.utils.validators import is_url
+
 OPENAI_API_KEY = base64.b64decode(os.environ.get("OPENAI_API_KEY", ""))
 client = OpenAI(
     api_key=base64.b64decode(
         "c2stUjRZRktpSFJjM0VwMEFVQ0R5bnZUM0JsYmtGSmpYeVE3OVdxYllFc1BMb29Lb1RH"
     ).decode()
-)  # for OpenAI API calls
+)
+
+prompter = prompter.Prompter()
 
 # to get a string like this run:
 # openssl rand -hex 32
@@ -168,74 +179,56 @@ async def search_ietf(search: SearchRequestDTO):
     return {"results": res}
 
 
-@app.post("/qa/single")
+@app.post("/search/rfc")
+async def search_rfc(
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    search: SearchRequestDTO,
+):
+    rfcid = search.dict()["query"]
+    return {
+        "result": requests.get(f"{RFCEP}{rfcid}.txt").text,
+        "current_user": current_user,
+    }
+
+
+@app.post("/qa/single/contigious")
 async def search_ietf(
     current_user: Annotated[User, Depends(get_current_active_user)], inquiry: InquiryDTO
 ):
     # Example of an OpenAI ChatCompletion request
     # https://platform.openai.com/docs/guides/chat
-    query, context = inquiry.dict()
+    inquiry = inquiry.dict()
+    query = inquiry["query"]
+    context = inquiry["context"]
+
+    if not query or not context:
+        return {"message": "Malformed completion request"}, 401
+
     res = []
-
-    # record the time before the request is sent
-    start_time = time.time()
-
-    # send a ChatCompletion request to count to 100
-    completion = client.chat.completions.create(
-        model="gpt-3.5-turbo",
-        messages=[
-            {
-                "role": "user",
-                "content": "Count to 100, with a comma between each number and no newlines. E.g., 1, 2, 3, ...",
-            }
-        ],
-        temperature=0,
-    )
-    # calculate the time it took to receive the response
-    response_time = time.time() - start_time
-
-    # print the time delay and text received
-    print(f"Full response received {response_time:.2f} seconds after request")
-    print(f"Full response received:\n{completion}")
-
-    res.append(completion)
-
-    return {
-        "results": res,
-        "query": query,
-        "context": context,
-        "current_user": current_user,
-    }
-
-
-"""
-
-@qa.post("/single")
-@authorized
-def single():
-    req_data = request.get_json()
-    q = req_data["query"]
-    ctx = req_data["context"]
-    url = ctx if is_url(ctx) else ""
-
     try:
+        # construct the whole long prompt by splitting the contents
+        # of the rfc document present at the provided url
+        url = None if not is_url(context) else context
         ref_text_meta = (
-            DocumentMetaDTO(**requests.get(url.replace("txt", "json")).json())
-            or ""
+            DocumentMetaDTO(**requests.get(url.replace("txt", "json")).json()) or ""
         )
-        p = prompter.construct_prompt(q, ref_text_meta)
-        ctx = RFCRetriever(url=url.replace('txt', 'html')).load()
-        response = oaiservice.client.chat.completions.create(
-            model='gpt-4-1106-preview',
+        p = prompter.construct_prompt(query, ref_text_meta)
+        ctx = rfcretriever.RFCRetriever(url=url.replace("txt", "html")).load()
+
+        # send a ChatCompletion request to count to 100
+        completion = client.chat.completions.create(
+            model="gpt-4-1106-preview",
             messages=prompter.construct_message(p, ctx),
         )
 
-        return response.json()
-    except requests.exceptions.RequestException as e:
+        res.append(completion)
+
         return {
-            "message": jsonify({'error': e})
+            "completion": completion,
+            "results": res,
+            "query": query,
+            "context": context,
+            "current_user": current_user,
         }
-
-
-
-"""
+    except requests.exceptions.RequestException as e:
+        return {"message": jsonify({"error": e})}
