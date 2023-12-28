@@ -1,27 +1,21 @@
 from datetime import datetime, timedelta
 from typing import Annotated, Any
-import base64, os
-from urllib.parse import urlparse
+import base64, os, requests
 from fastapi import Depends, FastAPI, HTTPException, status
-from fastapi.responses import StreamingResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from flask import jsonify
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
-import requests
-from rfcllm.config.settings import RFCEP
+from starlette.status import HTTP_407_PROXY_AUTHENTICATION_REQUIRED
+from rfcllm.config.settings import RFCEP, DTEP
 from rfcllm.core import Prompter as prompter, RFCRetriever as rfcretriever
 from rfcllm.dto.DocumentMetaDTO import DocumentMetaDTO
 from rfcllm.dto.InquiryDTO import InquiryDTO
-
+from fastapi.middleware.cors import CORSMiddleware
 from rfcllm.dto.SearchRequestDTO import SearchRequestDTO
 from rfcllm.services.RFCService import Retriever
-
-# imports
-import time  # for measuring time duration of API calls
 from openai import OpenAI
-
 from rfcllm.utils.validators import is_url
 
 OPENAI_API_KEY = base64.b64decode(os.environ.get("OPENAI_API_KEY", ""))
@@ -73,9 +67,7 @@ class UserInDB(User):
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
 app = FastAPI()
 
 
@@ -141,6 +133,16 @@ async def get_current_active_user(
     return current_user
 
 
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 @app.post("/token", response_model=Token)
 async def login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
@@ -175,6 +177,7 @@ async def read_own_items(
 
 @app.post("/search/query/ietf")
 async def search_ietf(search: SearchRequestDTO):
+    print(search)
     res = retriever.retrieve_search_rfceietf(query=search.query)
     return {"results": res}
 
@@ -190,16 +193,24 @@ async def search_rfc(
         "current_user": current_user,
     }
 
+@app.post("/group/groupmenu")
+async def group_groupmenu(
+    current_user: Annotated[User, Depends(get_current_active_user)]
+):
+    print(f'{DTEP}/group/groupmenu.json') 
+    res = requests.get(f'{DTEP}group/groupmenu.json').json()
+    print(res)
+    return {"result": res} 
 
 @app.post("/qa/single/contigious")
-async def search_ietf(
+async def qa_single_contigious(
     current_user: Annotated[User, Depends(get_current_active_user)], inquiry: InquiryDTO
 ):
     # Example of an OpenAI ChatCompletion request
     # https://platform.openai.com/docs/guides/chat
-    inquiry = inquiry.dict()
-    query = inquiry["query"]
-    context = inquiry["context"]
+    inquiry_as_dic: Any = inquiry.dict()
+    query = inquiry_as_dic["query"]
+    context = inquiry_as_dic["context"]
 
     if not query or not context:
         return {"message": "Malformed completion request"}, 401
@@ -208,17 +219,17 @@ async def search_ietf(
     try:
         # construct the whole long prompt by splitting the contents
         # of the rfc document present at the provided url
-        url = None if not is_url(context) else context
+        url = "" if not is_url(context) else context
         ref_text_meta = (
             DocumentMetaDTO(**requests.get(url.replace("txt", "json")).json()) or ""
         )
         p = prompter.construct_prompt(query, ref_text_meta)
         ctx = rfcretriever.RFCRetriever(url=url.replace("txt", "html")).load()
-
+        message: Any = prompter.construct_message(p, ctx)
         # send a ChatCompletion request to count to 100
         completion = client.chat.completions.create(
             model="gpt-4-1106-preview",
-            messages=prompter.construct_message(p, ctx),
+            messages=message,
         )
 
         res.append(completion)
