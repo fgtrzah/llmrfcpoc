@@ -33,3 +33,5 @@ class Prompter(object):
         res.append({"role": "user", "content": prompt})
 
         return res
+
+prompter = Prompter()

@@ -2,16 +2,16 @@ from typing import Annotated, Any
 import base64, os, requests
 from fastapi import Depends, FastAPI
 from flask import jsonify
-from rfcllm.config.settings import RFCEP, DTEP 
+from rfcllm.config.settings import DTEP 
 from rfcllm.core import Prompter as prompter, RFCRetriever as rfcretriever
 from rfcllm.dto.DocumentMetaDTO import DocumentMetaDTO
 from rfcllm.dto.InquiryDTO import InquiryDTO
 from fastapi.middleware.cors import CORSMiddleware
-from rfcllm.dto.SearchRequestDTO import SearchRequestDTO
-from rfcllm.services.RFCService import Retriever
 from openai import OpenAI
+from rfcllm.group.routes import group
 from rfcllm.utils.validators import is_url
 from rfcllm.iam.routes import iam
+from rfcllm.search.routes import search
 from rfcllm.iam.dto import User 
 from rfcllm.iam.utils import get_current_active_user 
 
@@ -21,14 +21,7 @@ client = OpenAI(
         "c2stUjRZRktpSFJjM0VwMEFVQ0R5bnZUM0JsYmtGSmpYeVE3OVdxYllFc1BMb29Lb1RH"
     ).decode()
 )
-
 prompter = prompter.Prompter()
-
-# to get a string like this run:
-# openssl rand -hex 32
-
-
-retriever = Retriever()
 app = FastAPI()
 origins = ["http://localhost:5174"]
 
@@ -41,33 +34,9 @@ app.add_middleware(
 )
 
 app = iam(app)
-
-@app.post("/search/query/ietf")
-async def search_ietf(search: SearchRequestDTO):
-    print(search)
-    res = retriever.retrieve_search_rfceietf(query=search.query)
-    return {"results": res}
-
-
-@app.post("/search/rfc")
-async def search_rfc(
-    current_user: Annotated[User, Depends(get_current_active_user)],
-    search: SearchRequestDTO,
-):
-    rfcid = search.dict()["query"]
-    return {
-        "result": requests.get(f"{RFCEP}{rfcid}.txt").text,
-        "current_user": current_user,
-    }
-
-@app.post("/group/groupmenu")
-async def group_groupmenu(
-    current_user: Annotated[User, Depends(get_current_active_user)]
-):
-    print(f'{DTEP}/group/groupmenu.json') 
-    res = requests.get(f'{DTEP}group/groupmenu.json').json()
-    print(res)
-    return {"result": res} 
+app = search(app)
+app = group(app)
+ 
 
 @app.post("/qa/single/contigious")
 async def qa_single_contigious(
