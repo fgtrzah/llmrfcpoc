@@ -62,3 +62,4 @@ RFCDELIMITERS = [
     "security considerations",
     "authors' addresses",
 ]
+ALGORITHM = "HS256"

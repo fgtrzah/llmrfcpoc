@@ -1,6 +1,6 @@
 import requests
 from typing import Annotated, Any
-from rfcllm.config.settings import RFCEP
+from rfcllm.config.settings import DTEP, RFCEP
 from fastapi import Depends
 from rfcllm.iam.dto import User
 from rfcllm.iam.utils import get_current_active_user
@@ -23,7 +23,14 @@ def search(app: Any):
         rfcid = search.dict()["query"]
         return {
             "result": requests.get(f"{RFCEP}{rfcid}.txt").text,
-            "current_user": current_user,
+            "current_user": current_user.email,
+        }
+
+    @app.post("/search/query/document")
+    async def search_query_document(search: SearchRequestDTO):
+        res = requests.get(f"{DTEP}api/v1/doc/document/{search.query}").json()
+        return {
+            "result": res,
         }
 
     return app

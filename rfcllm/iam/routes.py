@@ -16,6 +16,7 @@ def iam(app: Any):
     async def login_for_access_token(
         form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
     ):
+        print(form_data.username, form_data.password)
         user = authenticate_user(users_db, form_data.username, form_data.password)
         if not user:
             raise HTTPException(

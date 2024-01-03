@@ -1,6 +1,5 @@
 import base64, os
 from fastapi import FastAPI
-from fastapi.security import HTTPBearer
 from rfcllm.core import Prompter as prompter
 from fastapi.middleware.cors import CORSMiddleware
 from rfcllm.group.routes import group
@@ -12,7 +11,7 @@ OPENAI_API_KEY = base64.b64decode(os.environ.get("OPENAI_API_KEY", ""))
 
 prompter = prompter.Prompter()
 app = FastAPI()
-origins = ["http://localhost:5174"]
+origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
