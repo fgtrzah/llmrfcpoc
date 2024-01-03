@@ -1,6 +1,5 @@
 from pydantic import BaseModel
 
 
-class InquiryDTO(BaseModel):
+class SearchRequestDTO(BaseModel):
     query: str
-    context: str

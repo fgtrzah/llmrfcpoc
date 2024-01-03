@@ -2,7 +2,7 @@ import re
 from typing import Any, Optional
 import urllib.parse
 
-import requests 
+import requests
 from bs4 import BeautifulSoup
 from rfcllm.config.settings import IETFEP, RFCSEARCHEP, RFCSEARCHEPPARAMS
 
@@ -111,9 +111,7 @@ class Retriever:
             ("stream_name", "IETF"),
         ]
 
-        response = requests.get(
-            f"{RFCSEARCHEP}", params=params, headers=headers
-        )
+        response = requests.get(f"{RFCSEARCHEP}", params=params, headers=headers)
         res = self.get_extract_json_ietf(search_results=response).get("res")
         return res
 

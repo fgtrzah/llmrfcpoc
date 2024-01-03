@@ -19,6 +19,8 @@ users_db = {
         "disabled": False,
     }
 }
+
+
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
@@ -49,7 +51,11 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     else:
         expire = datetime.utcnow() + timedelta(minutes=15)
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, os.environ.get('SECRET_KEY', ''), algorithm=os.environ.get('ALGORITHM', ''))
+    encoded_jwt = jwt.encode(
+        to_encode,
+        os.environ.get("SECRET_KEY", ""),
+        algorithm=os.environ.get("ALGORITHM", ""),
+    )
     return encoded_jwt
 
 
@@ -60,7 +66,11 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        payload: Any = jwt.decode(token, os.environ.get('SECRET_KEY', ''), algorithms=[os.environ.get('ALGORITHM', '')])
+        payload: Any = jwt.decode(
+            token,
+            os.environ.get("SECRET_KEY", ""),
+            algorithms=[os.environ.get("ALGORITHM", "")],
+        )
         username: str = payload.get("sub")
         if username is None:
             raise credentials_exception
@@ -79,5 +89,3 @@ async def get_current_active_user(
     if current_user.disabled:
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
-
-

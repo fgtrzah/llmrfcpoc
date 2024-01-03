@@ -1,4 +1,3 @@
-
 class Prompter(object):
     def __init__(self, dialect=""):
         self.dialect = dialect
@@ -33,5 +32,6 @@ class Prompter(object):
         res.append({"role": "user", "content": prompt})
 
         return res
+
 
 prompter = Prompter()

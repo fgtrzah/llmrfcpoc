@@ -45,7 +45,7 @@ OAICHATMODEL = os.environ.get("OAICHATMODEL") or "gpt-4-1106-preview"
 OAIPROMPTINGMODEL = os.environ.get("OAIPROMPTINGMODEL") or "gpt-4-1106-preview"
 OAIEMBEDDINGMODEL = os.environ.get("OAIEMBEDDINGMODEL")
 IETFEP = os.environ.get("IETFEP", "https://datatracker.ietf.org/doc/search")
-DTEP = os.environ.get('DTEP', "https://datatracker.ietf.org/")
+DTEP = os.environ.get("DTEP", "https://datatracker.ietf.org/")
 RFCEP = os.environ.get("RFCEP", "https://www.rfc-editor.org/rfc/")
 RFCSEARCHEP = os.environ.get(
     "RFCSEARCHEP", "https://www.rfc-editor.org/search/rfc_search_detail.php"
