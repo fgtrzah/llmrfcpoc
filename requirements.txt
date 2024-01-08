@@ -2,3 +2,4 @@ uvicorn
 requests
 beautifulsoup4
 bs4
+fastapi-auth0

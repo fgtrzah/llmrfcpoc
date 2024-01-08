@@ -134,7 +134,15 @@ class Retriever:
 
         for _, row in enumerate(rows):
             cells = row.find_all("td")
-            res.append([c.text for c in cells])
+            links = []
+            if len(cells):
+                for c in cells:
+                    if c.find('a'):
+                        links.append(c.find('a')['href'])
+
+            res.append([c.text for c in cells] + links)
+
+        print(urls)
 
         return {"row": rows, "res": res, "urls": urls}
 

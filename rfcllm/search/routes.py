@@ -17,20 +17,20 @@ def search(app: Any):
 
     @app.post("/search/rfc")
     async def search_rfc(
-        current_user: Annotated[User, Depends(get_current_active_user)],
         search: SearchRequestDTO,
     ):
         rfcid = search.dict()["query"]
+        prefix = rfcid[:3]
+        id = rfcid[3:].lstrip("0")
         return {
-            "result": requests.get(f"{RFCEP}{rfcid}.txt").text,
-            "current_user": current_user.email,
+            "result": requests.get(f"{RFCEP}{(prefix + id).lower()}.txt").text,
         }
 
     @app.post("/search/query/document")
     async def search_query_document(search: SearchRequestDTO):
-        res = requests.get(f"{DTEP}api/v1/doc/document/{search.query}").json()
+        res = requests.get(f"{DTEP}api/v1/doc/document/?name__contains={search.query}&abstract__contains={search.query}&format=json&limit=1200").json()
         return {
-            "result": res,
+            "result": res
         }
 
     return app

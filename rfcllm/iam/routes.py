@@ -1,19 +1,26 @@
+import json
 from datetime import timedelta
 from typing import Annotated, Any
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Security
+from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from rfcllm.iam.dto import Token, User
 from rfcllm.iam.utils import (
+    get_oauth,
     users_db,
     authenticate_user,
     create_access_token,
     get_current_active_user,
 )
 
-
 def iam(app: Any):
+    @app.post("/oauth/login")
+    @get_oauth
+    async def oauth_login(user: Any):
+        return {**user}
+
     @app.post("/token", response_model=Token)
-    async def login_for_access_token(
+    async def token(
         form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
     ):
         print(form_data.username, form_data.password)
@@ -31,13 +38,13 @@ def iam(app: Any):
         return {"access_token": access_token, "token_type": "bearer"}
 
     @app.get("/users/me/", response_model=User)
-    async def read_users_me(
+    async def users_me(
         current_user: Annotated[User, Depends(get_current_active_user)]
     ):
         return current_user
 
     @app.get("/users/me/items/")
-    async def read_own_items(
+    async def users_me_items(
         current_user: Annotated[User, Depends(get_current_active_user)]
     ):
         return [{"item_id": "Foo", "owner": current_user.username}]
