@@ -65,23 +65,14 @@ def qa(app: Any):
         except requests.exceptions.RequestException as e:
             return {"message": jsonify({"error": e})}
    
-    async def generator():
-        for i in range(10):
-            yield "some streamed data"
-            await asyncio.sleep(1) # sleep one second
-
     def fake_data_streamer():
         for i in range(10):
             yield json.dumps({"event_id": i, "data": "some random data", "is_last_event": i == 9}) + '\n'
 
             time.sleep(0.5)
 
-    @app.get("/")
-    async def root():
-        print("Received a request on /")
-        return {"message": "Hello World"}
-    @app.get('/stream')
-    async def main():
+    @app.get('/qa/single/stream')
+    async def qa_single_stream():
         return StreamingResponse(fake_data_streamer(), media_type='application/x-ndjson')
 
     return app
