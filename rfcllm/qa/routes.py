@@ -12,9 +12,10 @@ from rfcllm.dto.InquiryDTO import InquiryDTO
 
 from rfcllm.iam.dto import User
 from rfcllm.iam.utils import get_current_active_user
+from rfcllm.qa.services import OAIService
 from rfcllm.utils.validators import is_url
 
-client = OpenAI(
+client = OAIService(
     api_key=base64.b64decode(
         "c2stUjRZRktpSFJjM0VwMEFVQ0R5bnZUM0JsYmtGSmpYeVE3OVdxYllFc1BMb29Lb1RH"
     ).decode()
