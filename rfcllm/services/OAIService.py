@@ -1,6 +1,6 @@
+import base64
 from typing import Any
 from openai import AsyncOpenAI
-
 
 class OAIService:
     api_key: str
@@ -10,8 +10,9 @@ class OAIService:
 
     def __init__(self):
         self.client = AsyncOpenAI(
-            # This is the default and can be omitted
-            api_key=self.api_key
+            api_key=base64.b64decode(
+                "c2stUjRZRktpSFJjM0VwMEFVQ0R5bnZUM0JsYmtGSmpYeVE3OVdxYllFc1BMb29Lb1RH"
+            ).decode()
         )
 
     async def get_completion_stream(self, **kwargs: Any):
