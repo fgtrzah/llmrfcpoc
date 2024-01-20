@@ -12,9 +12,7 @@ def group(app: Any):
     async def group_groupmenu(
         current_user: Annotated[User, Depends(get_current_active_user)]
     ):
-        print(f"{DTEP}/group/groupmenu.json")
         res = requests.get(f"{DTEP}group/groupmenu.json").json()
-        print(res)
         return {"result": res}
 
     return app

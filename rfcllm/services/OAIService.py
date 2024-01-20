@@ -1,6 +1,7 @@
-import base64
 from typing import Any
 from openai import OpenAI
+
+from rfcllm.config.settings import OPENAI_API_KEY
 
 
 class OAIService:
@@ -10,11 +11,7 @@ class OAIService:
     embedding_model: str
 
     def __init__(self):
-        self.client = OpenAI(
-            api_key=base64.b64decode(
-                "c2stUjRZRktpSFJjM0VwMEFVQ0R5bnZUM0JsYmtGSmpYeVE3OVdxYllFc1BMb29Lb1RH"
-            ).decode()
-        )
+        self.client = OpenAI(api_key=OPENAI_API_KEY.decode())
 
     async def get_completion_stream(self, **kwargs: Any):
         completions = await self.client.chat.completions.create(

@@ -1,9 +1,6 @@
 import requests
-from typing import Annotated, Any
+from typing import Any
 from rfcllm.config.settings import DTEP, RFCEP
-from fastapi import Depends
-from rfcllm.iam.dto import User
-from rfcllm.iam.utils import get_current_active_user
 from rfcllm.search.dto import SearchRequestDTO
 from rfcllm.services.RFCService import retriever
 

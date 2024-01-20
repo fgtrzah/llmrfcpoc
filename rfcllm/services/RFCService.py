@@ -25,47 +25,6 @@ class Retriever:
     def sanitize_text(self, _=""):
         return _
 
-    # async def load(self):
-    #     """
-    #     TODO: intro aio and multi-core
-    #     """
-    #     if not self.url:
-    #         return []
-
-    #     source_doc = requests.get(self.url).text
-    #     converter = Converter()
-    #     rfc_annotated_markup = converter.rfc2html(source_doc)
-    #     metadataurl = self.url.replace(".txt", ".json")
-    #     metadata = DocumentMetaDTO(**requests.get(metadataurl).json())
-    #     res = [
-    #         DocumentDTO(page_content=source_doc, metadata=metadata).toJSON()
-    #     ]
-
-    #     if self.recursive:
-    #         outward_links = self.extract_refs(source_doc)
-    #         depth = self.depth or 0
-    #         count = len(outward_links)
-
-    #         while count > 0 and depth > 0:
-    #             ext = outward_links[count - 1]
-    #             page_content = requests.get(ext).text.replace("\n", " ")
-    #             page_content = page_content.replace("\n\n", " ")
-    #             page_content = page_content.replace("\t", " ")
-
-    #             # TODO: text sanitize_text here
-
-    #             metadata: DocumentMetaDTO = requests.get(
-    #                 self.url.split(".")[0] + ".json"
-    #             ).json()
-    #             outward = DocumentDTO(
-    #                 page_content=page_content, metadata=metadata
-    #             ).toJSON()
-    #             res.append(outward)
-    #             depth -= 1
-    #             count -= 1
-
-    #     return [res, rfc_annotated_markup]
-
     def retrieve(self, url, **_):
         data = requests.get(url).text
         res = ""
@@ -142,8 +101,6 @@ class Retriever:
 
             res.append([c.text for c in cells] + links)
 
-        print(urls)
-
         return {"row": rows, "res": res, "urls": urls}
 
     def get_json_from_html(self, **kwargs):
@@ -154,8 +111,6 @@ class Retriever:
 
         soup = BeautifulSoup(search_results.text, "html.parser")
         table: Any = soup.find("table")
-
-        print(table)
 
         if not table:
             return {"message": "Search document sourcing error"}
@@ -200,23 +155,6 @@ class Retriever:
         try:
             if not dao or not self.dao:
                 return ""
-
-            # Embed the query
-            # query_embedding = openaiservice.embed(query)
-
-            # Get the top result from the index
-        #     vector_query = VectorQuery(
-        #         vector=query_embedding,
-        #         vector_field_name="embedding",
-        #         return_fields=["content"],
-        #         num_results=1,
-        #     )
-        #     results = self.dao.index.query(vector_query)
-        #     content = ""
-
-        #     if len(results) > 1:
-        #         content = results[0]["content"]
-        #     return content
         except Exception as e:
             raise e
         return {}

@@ -99,7 +99,6 @@ async def get_current_active_user(
 def get_oauth(func):
     @wraps(func)
     async def wrapper(*args, **kwargs):
-        print(kwargs.get("user"))
         conn = f"{AUTH0_DOMAIN}/oauth/token"
         headers = {"Content-Type": "application/json"}
         data = {
@@ -112,9 +111,6 @@ def get_oauth(func):
 
         if res.status_code != 200:
             raise HTTPException(status_code=res.status_code)
-
-        print(kwargs.values())
-        print(args)
 
         return await func(*args, {**res.json(), **kwargs})
 

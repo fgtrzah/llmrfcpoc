@@ -50,6 +50,7 @@ RFCEP = os.environ.get("RFCEP", "https://www.rfc-editor.org/rfc/")
 RFCSEARCHEP = os.environ.get(
     "RFCSEARCHEP", "https://www.rfc-editor.org/search/rfc_search_detail.php"
 )
+# yikers
 RFCSEARCHEPPARAMS = (
     os.environ.get("RFCSEARCHEPPARAMS")
     or "page=All&stream_name=IETF&pubstatus[]=Standards%20Track&pubstatus[]=Best%20Current%20Practice&pubstatus[]=Informational&pubstatus[]=Historic&std_trk=Internet%20Standard&pub_date_type=any&abstract=abson&keywords=keyson&sortkey=Number&sorting=ASC"

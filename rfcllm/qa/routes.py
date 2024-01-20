@@ -22,8 +22,6 @@ def qa(app: Any):
 
         res = []
         try:
-            # construct the whole long prompt by splitting the contents
-            # of the rfc document present at the provided url
             url = "" if not is_url(context) else context
             ref_text_meta = (
                 DocumentMetaDTO(**requests.get(url.replace("txt", "json")).json()) or ""
@@ -31,7 +29,6 @@ def qa(app: Any):
             p = prompter.construct_prompt(query, ref_text_meta)
             ctx = requests.get(url=url).text
             message: Any = prompter.construct_message(p, ctx.split("[Page"))
-            # send a ChatCompletion request to count to 100
             completion = oaisvc.client.chat.completions.create(
                 model="gpt-4-1106-preview",
                 messages=message,
@@ -39,6 +36,7 @@ def qa(app: Any):
 
             res.append(completion)
 
+            # TODO: opt into DTOs for this sort of stuff
             return {
                 "completion": completion,
                 "results": res,
@@ -50,7 +48,6 @@ def qa(app: Any):
 
     from fastapi.responses import StreamingResponse
 
-    # Route to handle SSE events and return users
     @app.post("/qa/single/stream")
     async def extract(inquiry: InquiryDTO):
         inquiry_as_dic: Any = inquiry.dict()
@@ -69,18 +66,20 @@ def qa(app: Any):
             ctx = requests.get(url=url).text
             messages: Any = prompter.construct_message(p, ctx.split("[Page"))
             completions = oaisvc.client.chat.completions.create(
-                model="gpt-4-1106-preview", stream=True, messages=messages
+                model="gpt-4-1106-preview",
+                stream=True,
+                messages=messages,
+                temperature=0,
             )
 
             async def generate():
-                for user in completions:
-                    resp_json = user.model_dump_json()
-                    yield resp_json + "\n"
+                for chunk in completions:
+                    resp_json = chunk.model_dump_json()
+                    yield "data: " + resp_json + "\n\n"
                 yield ""
 
             return StreamingResponse(generate(), media_type="text/event-stream")
         except requests.RequestException as e:
-            print(e)
             return {"error": e.__str__()}
 
     return app
