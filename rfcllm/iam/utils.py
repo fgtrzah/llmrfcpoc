@@ -7,7 +7,13 @@ from fastapi.security import OAuth2PasswordBearer
 
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-from rfcllm.config.settings import ALGORITHM, AUTH0_CLIENT_ID, AUTH0_CLIENT_SECRET, AUTH0_DOMAIN, SECRET_KEY
+from rfcllm.config.settings import (
+    ALGORITHM,
+    AUTH0_CLIENT_ID,
+    AUTH0_CLIENT_SECRET,
+    AUTH0_DOMAIN,
+    SECRET_KEY,
+)
 from rfcllm.iam.dto import TokenData, User, UserInDB
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -84,22 +90,23 @@ async def get_current_active_user(
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
 
-'''
+
+"""
     NOTE: final, official design choice for auth
-'''
+"""
+
+
 def get_oauth(func):
     @wraps(func)
     async def wrapper(*args, **kwargs):
-        print(kwargs.get('user'))
+        print(kwargs.get("user"))
         conn = f"{AUTH0_DOMAIN}/oauth/token"
-        headers = {
-            'Content-Type': 'application/json'
-        }
+        headers = {"Content-Type": "application/json"}
         data = {
             "client_id": AUTH0_CLIENT_ID,
             "client_secret": AUTH0_CLIENT_SECRET,
-            "audience": kwargs.get('user'),
-            "grant_type": "client_credentials"
+            "audience": kwargs.get("user"),
+            "grant_type": "client_credentials",
         }
         res = requests.post(conn, json=data, headers=headers)
 
@@ -109,9 +116,6 @@ def get_oauth(func):
         print(kwargs.values())
         print(args)
 
-        return await func(
-            *args, 
-            { **res.json(), **kwargs }
-        )
+        return await func(*args, {**res.json(), **kwargs})
 
     return wrapper

@@ -13,6 +13,7 @@ from rfcllm.iam.utils import (
     get_current_active_user,
 )
 
+
 def iam(app: Any):
     @app.post("/oauth/login")
     @get_oauth
@@ -20,9 +21,7 @@ def iam(app: Any):
         return {**user}
 
     @app.post("/token", response_model=Token)
-    async def token(
-        form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
-    ):
+    async def token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
         print(form_data.username, form_data.password)
         user = authenticate_user(users_db, form_data.username, form_data.password)
         if not user:
@@ -38,9 +37,7 @@ def iam(app: Any):
         return {"access_token": access_token, "token_type": "bearer"}
 
     @app.get("/users/me/", response_model=User)
-    async def users_me(
-        current_user: Annotated[User, Depends(get_current_active_user)]
-    ):
+    async def users_me(current_user: Annotated[User, Depends(get_current_active_user)]):
         return current_user
 
     @app.get("/users/me/items/")

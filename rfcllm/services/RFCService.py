@@ -137,8 +137,8 @@ class Retriever:
             links = []
             if len(cells):
                 for c in cells:
-                    if c.find('a'):
-                        links.append(c.find('a')['href'])
+                    if c.find("a"):
+                        links.append(c.find("a")["href"])
 
             res.append([c.text for c in cells] + links)
 

@@ -28,9 +28,9 @@ def search(app: Any):
 
     @app.post("/search/query/document")
     async def search_query_document(search: SearchRequestDTO):
-        res = requests.get(f"{DTEP}api/v1/doc/document/?name__contains={search.query}&abstract__contains={search.query}&format=json&limit=1200").json()
-        return {
-            "result": res
-        }
+        res = requests.get(
+            f"{DTEP}api/v1/doc/document/?name__contains={search.query}&abstract__contains={search.query}&format=json&limit=1200"
+        ).json()
+        return {"result": res}
 
     return app

@@ -2,6 +2,7 @@ import base64
 from typing import Any
 from openai import OpenAI
 
+
 class OAIService:
     api_key: str
     client: Any
@@ -17,7 +18,7 @@ class OAIService:
 
     async def get_completion_stream(self, **kwargs: Any):
         completions = await self.client.chat.completions.create(
-            messages=kwargs.get('messages'),
+            messages=kwargs.get("messages"),
             model="gpt-3.5-turbo",
         )
         return completions
