@@ -1,6 +1,6 @@
 import base64
 from typing import Any
-from openai import AsyncOpenAI
+from openai import OpenAI
 
 class OAIService:
     api_key: str
@@ -9,7 +9,7 @@ class OAIService:
     embedding_model: str
 
     def __init__(self):
-        self.client = AsyncOpenAI(
+        self.client = OpenAI(
             api_key=base64.b64decode(
                 "c2stUjRZRktpSFJjM0VwMEFVQ0R5bnZUM0JsYmtGSmpYeVE3OVdxYllFc1BMb29Lb1RH"
             ).decode()
