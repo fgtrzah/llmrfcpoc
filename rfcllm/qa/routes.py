@@ -13,7 +13,7 @@ oaisvc = OAIService()
 def qa(app: Any):
     @app.post("/qa/single/contigious")
     async def qa_single_contigious(inquiry: InquiryDTO):
-        inquiry_as_dic: Any = inquiry.dict()
+        inquiry_as_dic: Any = inquiry.model_dump()
         query = inquiry_as_dic["query"]
         context = inquiry_as_dic["context"]
 
