@@ -37,3 +37,9 @@ block in `main.py` and then ```python main.py```
 - whoever wrote the first RFC (idrk)
 - whoever decided how they'd 
   be formatted (cheff's kiss)
+
+#### MISC
+
+- some fake keys can be found in lfs / I was testing code analysis using codeql to 
+come up with a sensible security policy / bolster code quality
+- feedback and prs are always welcome
