@@ -38,6 +38,24 @@ block in `main.py` and then ```python main.py```
 - whoever decided how they'd 
   be formatted (cheff's kiss)
 
+#### Roadmap
+
+- moderation api endpoint usage for taming hallucinations
+- monitoring the egress/entry points attached to the parts
+of code interfacing with api response + interfacing with OpenAI
+requests
+- hard requirements: trace all dataflow to OpenAI whois info 
+and stow in sqlite while linking to currently authenticated user's
+id
+- toxicity detection and phonetic vulgarity filtering
+- controlled chaos prevention
+- draft t.o.s that is succinct and clearly emphasizes all data
+that is idempotently associable to the current user - ensure 0
+chance of liability and full transparency
+- trust but verify exhaustively
+- sanitize inputs (utilize a moderation dto layer for the no brainer 
+injection prevention needs)
+
 #### MISC
 
 - some fake keys can be found in lfs / I was testing code analysis using codeql to 
