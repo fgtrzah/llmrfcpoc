@@ -13,6 +13,7 @@ at your own potential peril / disgretion.
 #### Requiremnets
 
 - OpenAI API Key
+- Github App Registration
 
 #### Optional
 
@@ -23,6 +24,7 @@ at your own potential peril / disgretion.
 You can run local builds via most python virtualization tools and a set of metadata
 for scaffolding with necessary secrets/config params.
 
+0. ```mkcert localhost 127.0.0.1``` (optional but this project assumes https)
 1. ```cp .env.example .env``` and then step through and substitute as needed. The settings
 module under ```config/settings.py``` is self documenting and offers good indications of 
 necessary / optional environment variables
