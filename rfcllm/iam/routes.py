@@ -9,13 +9,13 @@ GHAUTHCLIENTSECRET = os.environ.get("GHAUTHCLIENTSECRET", "")
 sso = GithubSSO(
     client_id=GHAUTHCLIENTID,
     client_secret=GHAUTHCLIENTSECRET,
-    redirect_uri="http://localhost:5000/auth/callback",
+    redirect_uri=f"https://127.0.0.1:8000/auth/callback",
     allow_insecure_http=True,
 )
 
 def iam(app: Any):
     @app.get("/auth/login")
-    async def auth_init():
+    async def auth_login():
         """Initialize auth and redirect"""
         with sso:
             return await sso.get_login_redirect()
