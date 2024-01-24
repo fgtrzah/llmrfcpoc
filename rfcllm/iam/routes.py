@@ -1,7 +1,11 @@
+from fastapi.datastructures import QueryParams
+from fastapi.responses import RedirectResponse
+import requests
 from datetime import timedelta
 from typing import Annotated, Any
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
+from rfcllm.config.settings import GHAUTHEP, RFCCLIENTAPP
 from rfcllm.iam.dto import Token, User
 from rfcllm.iam.utils import (
     get_oauth,
@@ -13,10 +17,36 @@ from rfcllm.iam.utils import (
 
 
 def iam(app: Any):
-    @app.post("/oauth/login")
-    @get_oauth
-    async def oauth_login(user: Any):
-        return {**user}
+    @app.get('/oauth/access_token', response_model=RedirectResponse)
+    async def oauth_access_token(code: str | None = None):
+        res = requests.post(
+            f'{GHAUTHEP}/login/oauth/access_token',
+            json={
+                'client_id': GHAUTHCLIENTID,
+                'client_secret': GHAUTHCLIENTSECRET,
+                'code': code,
+                'redirect_uri': f'http://127.0.0.1/8000/oauth/token'
+
+            }
+        ) 
+    
+   
+    @app.get('/oauth/callback', response_model=RedirectResponse)
+    async def oauth_callback(code: str | None = None):
+        if code:
+            return RedirectResponse(f'{RFCCLIENTAPP}?code={code}')
+        return RedirectResponse(f'{RFCCLIENTAPP}/unauthorized')
+         
+
+    @app.get("/login/oauth", response_class=RedirectResponse)
+    async def login_auth():
+        gh_client_id = ''
+        gh_redirect_uri = ''
+        gh_state = ''
+
+        return RedirectResponse(
+            f'{GHAUTHEP}?client_id={gh_client_id}&state={gh_state}&redirect_uri={gh_redirect_uri}'
+        )
 
     @app.post("/token", response_model=Token)
     async def token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
@@ -43,5 +73,5 @@ def iam(app: Any):
         current_user: Annotated[User, Depends(get_current_active_user)]
     ):
         return [{"item_id": "Foo", "owner": current_user.username}]
-
+    
     return app

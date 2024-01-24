@@ -94,8 +94,6 @@ async def get_current_active_user(
 """
     NOTE: final, official design choice for auth
 """
-
-
 def get_oauth(func):
     @wraps(func)
     async def wrapper(*args, **kwargs):

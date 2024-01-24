@@ -68,3 +68,8 @@ ALGORITHM = "HS256"
 AUTH0_DOMAIN = os.environ.get("AUTH0_DOMAIN", "")
 AUTH0_CLIENT_ID = os.environ.get("AUTH0_CLIENT_ID", "")
 AUTH0_CLIENT_SECRET = os.environ.get("AUTH0_CLIENT_SECRET", "")
+
+GHAUTHEP = os.environ.get('GHAUTHEP', "")
+RFCCLIENTAPP = os.environ.get('RFCCLIENTAPP', '')
+GHAUTHCLIENTSECRET = os.environ.get('GHAUTHCLIENTSECRET', '')
+GHAUTHCLIENTID = os.environ.get('GHAUTHCLIENTID', '')
