@@ -4,7 +4,6 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
-from uvicorn.main import main
 
 from rfcllm.core import Prompter as prompter
 from rfcllm.group.routes import group
