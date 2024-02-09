@@ -52,43 +52,6 @@ CLIENT_SECRET = GHAUTHCLIENTSECRET
 REDIRECT_URI = GHAUTHREDIRECTEP
 
 def iam(app):
-    # @app.get('/auth/login')
-    # def login():
-    #     # Redirect the user to GitHub for authentication
-    #     return RedirectResponse(f'https://github.com/login/oauth/authorize?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}')
-
-    # @app.get('/auth/callback')
-    # async def callback(request: Request):
-    #     # Exchange the authorization code for an access token
-    #     code = request.query_params.get('code')
-    #     response = requests.post('https://github.com/login/oauth/access_token', {
-    #         'client_id': CLIENT_ID,
-    #         'client_secret': CLIENT_SECRET,
-    #         'code': code,
-    #         'redirect_uri': REDIRECT_URI
-    #     }, headers={'Accept': 'application/json'})
-
-    #     # Extract the access token from the response
-    #     access_token = response.json().get('access_token')
-
-    #     if access_token:
-    #         # Fetch the user profile using the access token
-    #         user_response = requests.get('https://api.github.com/user', headers={'Authorization': f'token {access_token}'})
-    #         user_profile = user_response.json()
-    #         return user_profile
-    #     else:
-    #         raise HTTPException(status_code=400, detail='Authentication failed')
-
-    # @app.exception_handler(HTTPException)
-    # async def http_exception_handler(request: Request, exc: HTTPException):
-    #     return JSONResponse(status_code=exc.status_code, content={'error': exc.detail})
-
-    # @app.get('/auth/success')
-    # async def auth_success(request: Request):
-    #     return templates.TemplateResponse("success.html", {"request": request})
-
-    # app = FastAPI()
-
     @app.get('/auth/login')
     def auth_login():
         # Redirect the user to GitHub for authentication

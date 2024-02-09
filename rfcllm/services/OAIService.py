@@ -11,7 +11,8 @@ class OAIService:
     embedding_model: str
 
     def __init__(self):
-        self.client = OpenAI(api_key=OPENAI_API_KEY.decode())
+        print(OPENAI_API_KEY)
+        self.client = OpenAI(api_key=OPENAI_API_KEY)
 
     async def get_completion_stream(self, **kwargs: Any):
         completions = await self.client.chat.completions.create(

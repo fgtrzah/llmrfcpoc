@@ -6,12 +6,13 @@ from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
 from rfcllm.core import Prompter as prompter
+from rfcllm.evals.eval_routes import eval_routes
 from rfcllm.group.routes import group
 from rfcllm.iam.routes import iam
 from rfcllm.qa.routes import qa
 from rfcllm.search.routes import search
 
-OPENAI_API_KEY = base64.b64decode(base64.b64decode(os.environ.get("OPENAI_API_KEY", "")))
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
 
 prompter = prompter.Prompter()
 app = FastAPI()
@@ -30,6 +31,7 @@ app = iam(app)
 app = search(app)
 app = group(app)
 app = qa(app)
+app = eval_routes(app)
 
 # current
 if __name__ == '__main__':

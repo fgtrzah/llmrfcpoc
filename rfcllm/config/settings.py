@@ -37,7 +37,7 @@ CELERY_CONFIG = {
 
 # Custom
 AUTHSECRET = os.environ.get("AUTHSECRET")
-OPENAI_API_KEY = base64.b64decode(os.environ.get("OPENAI_API_KEY", ""))
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
 RFCPAGESIZE = os.environ.get("RFCPAGESIZE", 4366)
 RFCCHUNKOVERLAP = os.environ.get("RFCCHUNKOVERLAP", 100)
 OAIENDPOINT = os.environ.get("OAIENDPOINT")
