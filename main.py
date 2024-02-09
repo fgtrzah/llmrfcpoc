@@ -11,7 +11,7 @@ from rfcllm.iam.routes import iam
 from rfcllm.qa.routes import qa
 from rfcllm.search.routes import search
 
-OPENAI_API_KEY = base64.b64decode(os.environ.get("OPENAI_API_KEY", ""))
+OPENAI_API_KEY = base64.b64decode(base64.b64decode(os.environ.get("OPENAI_API_KEY", "")))
 
 prompter = prompter.Prompter()
 app = FastAPI()
@@ -35,8 +35,8 @@ app = qa(app)
 if __name__ == '__main__':
     uvicorn.run(
         app='main:app',
-        ssl_keyfile="./localhost+1-key.pem",
-        ssl_certfile="./localhost+1.pem",
+        ssl_keyfile="./localhost+4-key.pem",
+        ssl_certfile="./localhost+4.pem",
         host="127.0.0.1", 
-        port=8000
+        port=8080
     )
