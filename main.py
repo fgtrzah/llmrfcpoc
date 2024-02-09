@@ -15,7 +15,7 @@ OPENAI_API_KEY = base64.b64decode(base64.b64decode(os.environ.get("OPENAI_API_KE
 
 prompter = prompter.Prompter()
 app = FastAPI()
-origins = ["http://localhost:5173"]
+origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
