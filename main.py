@@ -6,16 +6,17 @@ from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
 from rfcllm.core import Prompter as prompter
+from rfcllm.evals.eval_routes import eval_routes
 from rfcllm.group.routes import group
 from rfcllm.iam.routes import iam
 from rfcllm.qa.routes import qa
 from rfcllm.search.routes import search
 
-OPENAI_API_KEY = base64.b64decode(os.environ.get("OPENAI_API_KEY", ""))
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
 
 prompter = prompter.Prompter()
 app = FastAPI()
-origins = ["http://localhost:5173"]
+origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -30,13 +31,14 @@ app = iam(app)
 app = search(app)
 app = group(app)
 app = qa(app)
+app = eval_routes(app)
 
 # current
 if __name__ == '__main__':
     uvicorn.run(
         app='main:app',
-        ssl_keyfile="./localhost+1-key.pem",
-        ssl_certfile="./localhost+1.pem",
+        ssl_keyfile="./localhost+4-key.pem",
+        ssl_certfile="./localhost+4.pem",
         host="127.0.0.1", 
-        port=8000
+        port=8080
     )
