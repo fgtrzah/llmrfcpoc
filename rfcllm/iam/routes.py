@@ -1,51 +1,17 @@
-# import os
-# from typing import Any
-# from fastapi import Request
-# from fastapi_sso.sso.github import GithubSSO
-
-# GHAUTHCLIENTID = os.environ.get("GHAUTHCLIENTID", "")
-# GHAUTHCLIENTSECRET = os.environ.get("GHAUTHCLIENTSECRET", "")
-
-# sso = GithubSSO(
-#     client_id=GHAUTHCLIENTID,
-#     client_secret=GHAUTHCLIENTSECRET,
-#     redirect_uri=f"https://127.0.0.1:8080/auth/callback",
-#     allow_insecure_http=True,
-# )
-
-
-# def iam(app: Any):
-#     @app.get("/auth/token")
-#     async def auth_token():
-#         """Initialize auth and redirect"""
-#         with sso:
-#             return await sso.get_login_redirect()
-
-#     @app.get("/auth/login")
-#     async def auth_login():
-#         """Initialize auth and redirect"""
-#         with sso:
-#             return await sso.get_login_redirect()
-
-#     @app.get("/auth/callback")
-#     async def auth_callback(request: Request):
-#         """Verify login"""
-#         with sso:
-#             user = await sso.verify_and_process(request)
-#             return user
-
-#     return app
-
-
-
 import base64
 import json
+from urllib.parse import urlencode
 import requests
 
 from fastapi import FastAPI, Request, Response, HTTPException
 from fastapi.responses import RedirectResponse, JSONResponse
-from rfcllm.config.settings import GHAUTHCLIENTID, GHAUTHCLIENTSECRET, GHAUTHEP, GHAUTHREDIRECTEP
-
+from rfcllm.config.settings import (
+    GHAUTHCLIENTID, 
+    GHAUTHCLIENTSECRET, 
+    GHAUTHEP, 
+    GHAUTHREDIRECTEP,
+    GHAUTHCLIENTRURI
+)
 # GitHub App credentials
 CLIENT_ID = GHAUTHCLIENTID
 CLIENT_SECRET = GHAUTHCLIENTSECRET
@@ -59,10 +25,8 @@ def iam(app):
 
     @app.get('/auth/callback')
     async def auth_callback(request: Request):
-        print(request)
         # Exchange the authorization code for an access token
         code = request.query_params.get('code')
-        print('CP: ', code)
         response = requests.post('https://github.com/login/oauth/access_token', {
             'client_id': CLIENT_ID,
             'client_secret': CLIENT_SECRET,
@@ -77,7 +41,10 @@ def iam(app):
                 'https://api.github.com/user', 
                 headers={'Authorization': f'Bearer {access_token}'}
             )
-            return user_response.json()
+            # return user_response.json()
+            state = urlencode({"data": user_response.json()})
+            dest_url = f'http://localhost:5173?#state={state}'
+            return RedirectResponse(dest_url)
         else:
             raise HTTPException(status_code=400, detail='Authentication failed')
 
