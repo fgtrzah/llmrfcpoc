@@ -1,5 +1,6 @@
 from typing import Any
 import requests
+from openai import AsyncOpenAI
 from rfcllm.core.Prompter import prompter
 from rfcllm.dto.DocumentMetaDTO import DocumentMetaDTO
 from rfcllm.dto.InquiryDTO import InquiryDTO
@@ -84,24 +85,11 @@ def qa(app: Any):
 
 
     @app.post("/qa/evals/stream")
-    async def ask(inquiry: InquiryDTO):
-        inquiry_as_dic: Any = inquiry.dict()
-        query = inquiry_as_dic["query"]
-        context = inquiry_as_dic["context"]
-
-        if not query or not context:
-            return {"message": "Malformed completion request"}, 401
-
+    async def ask(inquiry: dict):
         try:
-            url = "" if not is_url(context) else context
-            ref_text_meta = (
-                DocumentMetaDTO(**requests.get(url.replace("txt", "json")).json()) or ""
-            )
-            p = prompter.construct_prompt(query, ref_text_meta)
-            ctx = requests.get(url=url).text
-            messages: Any = prompter.construct_message(p, ctx.split("[Page"))
-            stream = await oaisvc.client.chat.completions.create(
-                messages=messages,
+            client = AsyncOpenAI()
+            stream = await client.chat.completions.create(
+                messages=inquiry["messages"],
                 model="gpt-3.5-turbo",
                 stream=True,
             )
@@ -110,7 +98,8 @@ def qa(app: Any):
                 async for chunk in stream:
                     yield chunk.choices[0].delta.content or ""
 
-            return StreamingResponse(generator(), media_type="text/event-stream")
+            r = generator()
+            return StreamingResponse(r, media_type="text/event-stream")
         except requests.RequestException as e:
             return {"error": e.__str__()}
 
