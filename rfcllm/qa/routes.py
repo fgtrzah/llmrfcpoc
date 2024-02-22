@@ -82,4 +82,36 @@ def qa(app: Any):
         except requests.RequestException as e:
             return {"error": e.__str__()}
 
+
+    @app.post("/qa/evals/stream")
+    async def ask(inquiry: InquiryDTO):
+        inquiry_as_dic: Any = inquiry.dict()
+        query = inquiry_as_dic["query"]
+        context = inquiry_as_dic["context"]
+
+        if not query or not context:
+            return {"message": "Malformed completion request"}, 401
+
+        try:
+            url = "" if not is_url(context) else context
+            ref_text_meta = (
+                DocumentMetaDTO(**requests.get(url.replace("txt", "json")).json()) or ""
+            )
+            p = prompter.construct_prompt(query, ref_text_meta)
+            ctx = requests.get(url=url).text
+            messages: Any = prompter.construct_message(p, ctx.split("[Page"))
+            stream = await oaisvc.client.chat.completions.create(
+                messages=messages,
+                model="gpt-3.5-turbo",
+                stream=True,
+            )
+
+            async def generator():
+                async for chunk in stream:
+                    yield chunk.choices[0].delta.content or ""
+
+            return StreamingResponse(generator(), media_type="text/event-stream")
+        except requests.RequestException as e:
+            return {"error": e.__str__()}
+
     return app
