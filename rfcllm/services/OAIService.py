@@ -1,6 +1,5 @@
-from typing import Any
 from openai import OpenAI
-
+from typing import Any
 from rfcllm.config.settings import OPENAI_API_KEY
 
 

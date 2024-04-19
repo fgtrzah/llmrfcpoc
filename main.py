@@ -1,4 +1,3 @@
-import base64
 import os
 
 from fastapi import FastAPI
@@ -37,8 +36,9 @@ app = eval_routes(app)
 if __name__ == '__main__':
     uvicorn.run(
         app='main:app',
-        ssl_keyfile="./localhost+4-key.pem",
-        ssl_certfile="./localhost+4.pem",
+        ssl_keyfile="./fgtrz.com+3-key.pem",
+        ssl_certfile="./fgtrz.com+3.pem",
         host="127.0.0.1", 
-        port=8080
+        port=8080,
+        reload=True
     )

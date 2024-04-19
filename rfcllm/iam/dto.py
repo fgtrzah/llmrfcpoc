@@ -1,3 +1,4 @@
+from typing import Any
 from pydantic import BaseModel
 
 
@@ -7,14 +8,14 @@ class Token(BaseModel):
 
 
 class TokenData(BaseModel):
-    username: str | None = None
+    username: Any
 
 
 class User(BaseModel):
     username: str
-    email: str | None = None
-    full_name: str | None = None
-    disabled: bool | None = None
+    email: Any
+    full_name: Any
+    disabled: Any
 
 
 class UserInDB(User):

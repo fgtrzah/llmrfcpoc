@@ -1,7 +1,6 @@
 from dataclasses import dataclass
+import json
 from typing import Optional
-
-from flask import json
 
 from rfcllm.dto.DocumentMetaDTO import DocumentMetaDTO
 

@@ -37,7 +37,7 @@ CELERY_CONFIG = {
 
 # Custom
 AUTHSECRET = os.environ.get("AUTHSECRET")
-OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 RFCPAGESIZE = os.environ.get("RFCPAGESIZE", 4366)
 RFCCHUNKOVERLAP = os.environ.get("RFCCHUNKOVERLAP", 100)
 OAIENDPOINT = os.environ.get("OAIENDPOINT")
@@ -69,8 +69,11 @@ AUTH0_DOMAIN = os.environ.get("AUTH0_DOMAIN", "")
 AUTH0_CLIENT_ID = os.environ.get("AUTH0_CLIENT_ID", "")
 AUTH0_CLIENT_SECRET = os.environ.get("AUTH0_CLIENT_SECRET", "")
 RFCCLIENTAPP = os.environ.get("RFCCLIENTAPP", "")
-GHAUTHCLIENTSECRET = os.environ.get("GHAUTHCLIENTSECRET", "")
-GHAUTHCLIENTID = os.environ.get("GHAUTHCLIENTID", "")
+GHAUTHCLIENTSECRET = base64.b64decode(os.environ.get("GHAUTHCLIENTSECRET", ""))
+GHAUTHCLIENTID = base64.b64decode(os.environ.get("GHAUTHCLIENTID", ""))
 GHAUTHREDIRECTEP = os.environ.get("GHAUTHREDIRECTEP", "")
 GHAUTHEP = os.environ.get("GHAUTHEP", "")
-GHAUTHCLIENTRURI = os.environ.get('GHAUTHCLIENTRURI', '')
+GHAUTHCLIENTRURI = os.environ.get("GHAUTHCLIENTRURI", "")
+
+# System Strings
+INVOCATION_MODES = {"SINGLE": "SINGLE", "COMBINED": "COMBINED"}

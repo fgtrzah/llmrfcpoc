@@ -1,4 +1,4 @@
-import json, requests
+import requests
 from functools import wraps
 from datetime import datetime, timedelta
 from typing import Annotated, Any
@@ -52,12 +52,12 @@ def authenticate_user(fake_db, username: str, password: str):
     return user
 
 
-def create_access_token(data: dict, expires_delta: timedelta | None = None):
+def create_access_token(data: dict, expires_delta: Any):
     to_encode = data.copy()
     if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+        expire = datetime.now() + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
+        expire = datetime.now() + timedelta(minutes=15)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM or "RS256")
     return encoded_jwt

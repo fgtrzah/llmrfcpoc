@@ -1,3 +1,4 @@
+import re
 import requests
 from typing import Any
 from rfcllm.config.settings import DTEP, RFCEP
@@ -21,6 +22,13 @@ def search(app: Any):
         id = rfcid[3:].lstrip("0")
         return {
             "result": requests.get(f"{RFCEP}{(prefix + id).lower()}.txt").text,
+        }
+
+    @app.post("/search/rfc/meta")
+    async def search_rfc_meta(search: dict):
+        text = requests.get(search["url"]).text
+        return {
+            "refs": re.findall("(?P<url>https?://[^\\s]+)", text),
         }
 
     @app.post("/search/query/document")

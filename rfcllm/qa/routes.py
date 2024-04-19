@@ -1,6 +1,7 @@
 from typing import Any
 import requests
-from openai import AsyncOpenAI
+from rfcllm.config.settings import INVOCATION_MODES
+from rfcllm.core.LLMController import LLMController
 from rfcllm.core.Prompter import prompter
 from rfcllm.dto.DocumentMetaDTO import DocumentMetaDTO
 from rfcllm.dto.InquiryDTO import InquiryDTO
@@ -9,35 +10,37 @@ from rfcllm.services.OAIService import OAIService
 from rfcllm.utils.validators import is_url
 
 oaisvc = OAIService()
+llmc = LLMController()
 
 
 def qa(app: Any):
     @app.post("/qa/single/contigious")
     async def qa_single_contigious(inquiry: InquiryDTO):
-        inquiry_as_dic: Any = inquiry.model_dump()
-        query = inquiry_as_dic["query"]
-        context = inquiry_as_dic["context"]
+        inquiry_as_dict = inquiry.model_dump()
+        query = inquiry_as_dict["query"]
+        context = inquiry_as_dict["context"]
+        invocation_mode = (
+            inquiry_as_dict["invocation_mode"] or INVOCATION_MODES["SINGLE"]
+        )
+        invocation_filter = inquiry_as_dict["invocation_filter"]
 
         if not query or not context:
             return {"message": "Malformed completion request"}, 401
 
         res = []
+
         try:
-            url = "" if not is_url(context) else context
-            ref_text_meta = (
-                DocumentMetaDTO(**requests.get(url.replace("txt", "json")).json()) or ""
-            )
-            p = prompter.construct_prompt(query, ref_text_meta)
-            ctx = requests.get(url=url).text
-            message: Any = prompter.construct_message(p, ctx.split("[Page"))
-            completion = oaisvc.client.chat.completions.create(
-                model="gpt-4-1106-preview",
-                messages=message,
-            )
+            if invocation_mode == INVOCATION_MODES["SINGLE"]:
+                completion = llmc.invoke_single(**inquiry_as_dict)
+            elif invocation_mode == INVOCATION_MODES["COMBINED"]:
+                completion = llmc.invoke_combined(**inquiry_as_dict)
+            else:
+                return {
+                    "message": "Malformed completion request, please troubleshoot invocation parameters"
+                }, 401
 
             res.append(completion)
 
-            # TODO: opt into DTOs for this sort of stuff
             return {
                 "completion": completion,
                 "results": res,
@@ -50,8 +53,8 @@ def qa(app: Any):
     from fastapi.responses import StreamingResponse
 
     @app.post("/qa/single/stream")
-    async def extract(inquiry: InquiryDTO):
-        inquiry_as_dic: Any = inquiry.dict()
+    async def qa_single_stream(inquiry: InquiryDTO):
+        inquiry_as_dic = inquiry.model_dump()
         query = inquiry_as_dic["query"]
         context = inquiry_as_dic["context"]
 
@@ -83,11 +86,10 @@ def qa(app: Any):
         except requests.RequestException as e:
             return {"error": e.__str__()}
 
-
     @app.post("/qa/evals/stream")
-    async def ask(inquiry: dict):
+    async def qa_evals_stream(inquiry: dict):
         try:
-            client = AsyncOpenAI()
+            client = oaisvc.client
             stream = await client.chat.completions.create(
                 messages=inquiry["messages"],
                 model="gpt-3.5-turbo",
