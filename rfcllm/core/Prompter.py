@@ -12,9 +12,10 @@ class Prompter(object):
                 You will be provided with a document delimited by triple quotes
                 and a question. Answer the question using only
                 the provided document and to cite the passage(s) of the document
-                used to answer the question. If the document does not contain
-                the information needed to answer this question then simply
-                write: "Insufficient information.".
+                used to answer the question. If you're unable to use
+                the contents of the document to answer the question
+                accurately, write: "Insufficient information." and whenever possible
+                explain why.
             User:
                 \"\"\"'{}'\"\"\"
                 Question:
