@@ -2,15 +2,18 @@ import re
 import requests
 from typing import Any
 from rfcllm.config.settings import DTEP, RFCEP
-from rfcllm.search.dto import SearchRequestDTO
+from rfcllm.dto.SearchRequestDTO import SearchRequestDTO
 from rfcllm.services.RFCService import retriever
 
 
 def search(app: Any):
     @app.post("/search/query/ietf")
     async def search_ietf(search: SearchRequestDTO):
-        print(search)
-        res = retriever.retrieve_search_rfceietf(query=search.query)
+        search_as_dict = search.model_dump()
+        query = search_as_dict["query"]
+        if not query:
+            return {"error": "Malformed search query"}
+        res = retriever.retrieve_search_rfceietf(query=query)
         return {"results": res}
 
     @app.post("/search/rfc")

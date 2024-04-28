@@ -2,6 +2,7 @@ uvicorn
 requests
 beautifulsoup4
 bs4
+fastapi
 fastapi-auth0
 fastapi-sso==0.10.0
 fastapi>=0.109.1 # not directly required, pinned by Snyk to avoid a vulnerability

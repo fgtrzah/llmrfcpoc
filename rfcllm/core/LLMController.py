@@ -16,6 +16,7 @@ Synopsis:
 - req provides model ids for
   composition
 """
+import json
 import requests
 
 from rfcllm.core.Prompter import prompter
@@ -67,7 +68,6 @@ class LLMController(object):
             model="mistralai/Mixtral-8x22B-Instruct-v0.1",
             prompt=convert_message_list_to_text(messages),
         )
-        print(completions)
         return completions
 
     def llama2_qa_contigious(self, **kwargs):
@@ -77,14 +77,20 @@ class LLMController(object):
         ref_text_meta = (
             DocumentMetaDTO(**requests.get(url.replace("txt", "json")).json()) or ""
         )
+        penclave_ctx = requests.get(url=url).text
+        penclave = prompter.construct_prompt("summarize the contents of this entire rfc, omit repetitive portions and condense text", penclave_ctx)
+        penclave_messages = prompter.construct_prompt(penclave, penclave_ctx.split("[Page"))
+        penc_cmpls = oaisvc.client.chat.completions.create(
+            model="gpt-4-1106-preview",
+            messages=[{"role": "system", "content": f"summarize the contents of the text beneath \"start:\"\nstart:\n{penclave_ctx}"}],
+        )
+        print("INFO: \t ", penc_cmpls)
         p = prompter.construct_prompt(query, ref_text_meta)
-        ctx = requests.get(url=url).text
-        messages = prompter.construct_message(p, ctx.split("[Page"))
+        messages = prompter.construct_message(p, ctx=[penc_cmpls.choices[0].message["content"]])
         completions = llama2svc.client.completions.create(
             model="meta-llama/Llama-2-70b-chat-hf",
             prompt=convert_message_list_to_text(messages),
         )
-        print(completions)
         return completions
 
 

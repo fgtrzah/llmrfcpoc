@@ -1,3 +1,33 @@
+Note: snippets for handling concurrent api requests
+
+```python
+from fastapi import FastAPI
+import asyncio
+
+app = FastAPI()
+
+async def fetch_data(url):
+    # Simulate fetching data from an API
+    await asyncio.sleep(1)
+    return f"Data from {url}"
+
+@app.get("/concurrent")
+async def concurrent_requests():
+    urls = ["api1", "api2", "api3"]  # List of API endpoints to fetch data from
+
+    tasks = [fetch_data(url) for url in urls]
+    results = await asyncio.gather(*tasks)
+
+    return results
+
+# Run the FastAPI app
+import uvicorn
+uvicorn.run(app, host="127.0.0.1", port=8000)
+```
+
+
+Note: snippets for handling common oai api request scenarios
+
 ```python
 # two intermediate snippets which we'll stow for later reference
 def get_openai_generator(prompt: str):
