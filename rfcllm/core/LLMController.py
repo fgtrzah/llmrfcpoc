@@ -59,9 +59,7 @@ class LLMController(object):
         context = kwargs.get("context", "")
         query = kwargs.get("query", "")
         url = "" if not is_url(context) else context
-        ref_text_meta = (
-            DocumentMetaDTO(**requests.get(url.replace("txt", "json")).json()) or ""
-        )
+        ref_text_meta = DocumentMetaDTO(**requests.get(url.replace("txt", "json")).json()) or ""
         p = prompter.construct_prompt(query, ref_text_meta)
         ctx = requests.get(url=url).text
         messages = prompter.construct_message(p, ctx.split("[Page"))
@@ -75,33 +73,32 @@ class LLMController(object):
         context = kwargs.get("context", "")
         query = kwargs.get("query", "")
         url = "" if not is_url(context) else context
-        ref_text_meta = (
-            DocumentMetaDTO(**requests.get(url.replace("txt", "json")).json()) or ""
-        )
-        penclave_ctx = requests.get(url=url).text
-        penclave = prompter.construct_prompt(
-            "summarize the contents of this entire rfc, omit repetitive portions and condense text",
-            penclave_ctx,
-        )
-        penclave_messages = prompter.construct_prompt(
-            penclave, penclave_ctx.split("[Page")
-        )
-        penc_cmpls = oaisvc.client.chat.completions.create(
-            model="gpt-4-1106-preview",
-            messages=[
-                {
-                    "role": "system",
-                    "content": f'summarize the contents of the text beneath "start:"\nstart:\n{penclave_ctx}',
-                }
-            ],
-        )
-        print("INFO: \t ", penc_cmpls)
+        ref_text_meta = DocumentMetaDTO(**requests.get(url.replace("txt", "json")).json()) or ""
+        # penclave = prompter.construct_prompt(
+        #     "summarize the contents of this entire rfc, omit repetitive portions and condense text\n",
+        #     penclave_ctx,
+        # )
+        # penc_cmpls = oaisvc.client.chat.completions.create(
+        #     model="gpt-4-1106-preview",
+        #     messages=[{"role": "system", "content": "summarize the contents of this entire rfc, omit repetitive portions and condense text down to 500 words:\n\n " + penclave_ctx}],
+        # )
+        # p = prompter.construct_prompt(query, ref_text_meta)
+        # messages = prompter.construct_message(
+        #     p, ctx=penc_cmpls.choices[0].message.content
+        # )
+
+        # print(completions.choices[0].messages.content)
+        # return completions
         p = prompter.construct_prompt(query, ref_text_meta)
-        messages = prompter.construct_message(
-            p, ctx=[penc_cmpls.choices[0].message["content"]]
+        ctx = requests.get(url=url).text
+        messages = prompter.construct_message(p, ctx.split("[Page"))
+        condensed_context = oaisvc.client.chat.completions.create(
+            model="gpt-4-1106-preview",
+            messages=messages,
         )
+        messages = condensed_context.choices
         completions = llama2svc.client.completions.create(
-            model="meta-llama/Llama-2-70b-chat-hf",
+            model="meta-llama/Meta-Llama-3-8B-Instruct",
             prompt=convert_message_list_to_text(messages),
         )
         return completions
@@ -110,9 +107,7 @@ class LLMController(object):
         context = kwargs.get("context", "")
         query = kwargs.get("query", "")
         url = "" if not is_url(context) else context
-        ref_text_meta = (
-            DocumentMetaDTO(**requests.get(url.replace("txt", "json")).json()) or ""
-        )
+        ref_text_meta = DocumentMetaDTO(**requests.get(url.replace("txt", "json")).json()) or ""
         p = prompter.construct_prompt(query, ref_text_meta)
         ctx = requests.get(url=url).text
         messages = prompter.construct_message(p, ctx.split("[Page"))
@@ -128,9 +123,7 @@ class LLMController(object):
         context = kwargs.get("context", "")
         query = kwargs.get("query", "")
         url = "" if not is_url(context) else context
-        ref_text_meta = (
-            DocumentMetaDTO(**requests.get(url.replace("txt", "json")).json()) or ""
-        )
+        ref_text_meta = DocumentMetaDTO(**requests.get(url.replace("txt", "json")).json()) or ""
         p = prompter.construct_prompt(query, ref_text_meta)
         ctx = requests.get(url=url).text
         messages = prompter.construct_message(p, ctx.split("[Page"))

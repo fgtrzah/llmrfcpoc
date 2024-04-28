@@ -23,9 +23,7 @@ def iam(app):
     @app.get("/auth/login")
     def auth_login():
         # Redirect the user to GitHub for authentication
-        return RedirectResponse(
-            f"{GHAUTHEP}?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}"
-        )
+        return RedirectResponse(f"{GHAUTHEP}?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}")
 
     @app.get("/auth/callback")
     async def auth_callback(request: Request):
