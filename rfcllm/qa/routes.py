@@ -54,9 +54,7 @@ def qa(app: Any):
         try:
             client = oaisvc.client
             stream = client.chat.completions.create(
-                messages=inquiry["messages"],
-                model="gpt-3.5-turbo",
-                stream=True
+                messages=inquiry["messages"], model="gpt-3.5-turbo", stream=True
             )
 
             async def generator():
