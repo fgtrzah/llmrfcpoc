@@ -10,7 +10,7 @@ def convert_message_list_to_text(messages: list) -> str:
     B_SYS, E_SYS = "<<SYS>>\n", "\n<</SYS>>\n\n"
     text = ""
 
-    if "role" in vars(messages[0]).keys() and messages[0]["role"] == "system":
+    if messages and messages[0]["role"] == "system":
         messages = [
             {
                 "role": messages[1]["role"],
