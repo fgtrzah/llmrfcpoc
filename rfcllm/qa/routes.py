@@ -44,7 +44,7 @@ def qa(app: Any):
             return {
                 "completion": completion,
                 "query": query,
-                "context": context,
+                "context": context
             }
         except requests.exceptions.RequestException as e:
             return {"message": {"error": e}}
