@@ -8,7 +8,9 @@ SYS_USERSTORE = os.getenv("SYS_USERSTORE", "")
 SECRET_KEY = os.getenv("SECRET_KEY", "")
 DEBUG = bool(os.getenv("FLASK_DEBUG", "false"))
 
-SERVER_NAME = os.getenv("SERVER_NAME", "localhost:{0}".format(os.getenv("PORT", "8000")))
+SERVER_NAME = os.getenv(
+    "SERVER_NAME", "localhost:{0}".format(os.getenv("PORT", "8000"))
+)
 # SQLAlchemy.
 pg_user = os.getenv("POSTGRES_USER", "rfcllm")
 pg_pass = os.getenv("POSTGRES_PASSWORD", "password")
@@ -47,7 +49,9 @@ OAIEMBEDDINGMODEL = os.environ.get("OAIEMBEDDINGMODEL")
 IETFEP = os.environ.get("IETFEP", "https://datatracker.ietf.org/doc/search")
 DTEP = os.environ.get("DTEP", "https://datatracker.ietf.org/")
 RFCEP = os.environ.get("RFCEP", "https://www.rfc-editor.org/rfc/")
-RFCSEARCHEP = os.environ.get("RFCSEARCHEP", "https://www.rfc-editor.org/search/rfc_search_detail.php")
+RFCSEARCHEP = os.environ.get(
+    "RFCSEARCHEP", "https://www.rfc-editor.org/search/rfc_search_detail.php"
+)
 # yikers
 RFCSEARCHEPPARAMS = (
     os.environ.get("RFCSEARCHEPPARAMS")

@@ -59,7 +59,9 @@ class LLMController(object):
         context = kwargs.get("context", "")
         query = kwargs.get("query", "")
         url = "" if not is_url(context) else context
-        ref_text_meta = DocumentMetaDTO(**requests.get(url.replace("txt", "json")).json()) or ""
+        ref_text_meta = (
+            DocumentMetaDTO(**requests.get(url.replace("txt", "json")).json()) or ""
+        )
         p = prompter.construct_prompt(query, ref_text_meta)
         ctx = requests.get(url=url).text
         messages = prompter.construct_message(p, ctx.split("[Page"))
@@ -73,17 +75,19 @@ class LLMController(object):
         context = kwargs.get("context", "")
         query = kwargs.get("query", "")
         url = "" if not is_url(context) else context
-        ref_text_meta = DocumentMetaDTO(**requests.get(url.replace("txt", "json")).json()) or ""
+        ref_text_meta = (
+            DocumentMetaDTO(**requests.get(url.replace("txt", "json")).json()) or ""
+        )
         p = prompter.construct_prompt(query, ref_text_meta)
         ctx = requests.get(url=url).text
         messages = prompter.construct_message(p, ctx.split("[Page"))
         condensed_context = oaisvc.client.chat.completions.create(
             model="gpt-4-1106-preview",
             messages=messages,
-        )
-        messages = condensed_context.choices
-        completions = llama2svc.client.completions.create(
-            model="meta-llama/Meta-Llama-3-8B-Instruct", prompt=convert_message_list_to_text(messages)
+        ).choices
+        condensed_context = [ch.message for ch in condensed_context]
+        completions = llama2svc.client.chat.completions.create(
+            model="meta-llama/Meta-Llama-3-8B-Instruct", messages=condensed_context
         )
         return completions
 
@@ -91,7 +95,9 @@ class LLMController(object):
         context = kwargs.get("context", "")
         query = kwargs.get("query", "")
         url = "" if not is_url(context) else context
-        ref_text_meta = DocumentMetaDTO(**requests.get(url.replace("txt", "json")).json()) or ""
+        ref_text_meta = (
+            DocumentMetaDTO(**requests.get(url.replace("txt", "json")).json()) or ""
+        )
         p = prompter.construct_prompt(query, ref_text_meta)
         ctx = requests.get(url=url).text
         messages = prompter.construct_message(p, ctx.split("[Page"))
@@ -107,7 +113,9 @@ class LLMController(object):
         context = kwargs.get("context", "")
         query = kwargs.get("query", "")
         url = "" if not is_url(context) else context
-        ref_text_meta = DocumentMetaDTO(**requests.get(url.replace("txt", "json")).json()) or ""
+        ref_text_meta = (
+            DocumentMetaDTO(**requests.get(url.replace("txt", "json")).json()) or ""
+        )
         p = prompter.construct_prompt(query, ref_text_meta)
         ctx = requests.get(url=url).text
         messages = prompter.construct_message(p, ctx.split("[Page"))

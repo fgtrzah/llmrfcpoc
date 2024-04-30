@@ -8,15 +8,17 @@ class Prompter(object):
 
     def construct_prompt(self, q, ctx):
         prompt_template = """
-            System:
-                You will be provided with a document delimited by triple quotes
+
+            \nSystem:
+                You will be provided with a document delimited by triple quotes 
+                followed by the label \"Question:\"
                 and a question. Answer the question using only
-                the provided document and to cite the passage(s) of the document
+                the provided document and cite the passage(s) of the document
                 used to answer the question. If you're unable to use
                 the contents of the document to answer the question
-                accurately, write: "Insufficient information." and whenever possible
-                explain why.
-            User:
+                accurately, write: "Insufficient information." and if possible
+                explain why. Think through this task step by step.\n
+            User:\n
                 \"\"\"'{}'\"\"\"
                 Question:
         """

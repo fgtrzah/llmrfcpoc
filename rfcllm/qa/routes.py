@@ -20,7 +20,9 @@ def qa(app: Any):
         inquiry_as_dict = inquiry.model_dump()
         query = inquiry_as_dict["query"]
         context = inquiry_as_dict["context"]
-        invocation_mode = inquiry_as_dict["invocation_mode"] or INVOCATION_MODES["SINGLE"]
+        invocation_mode = (
+            inquiry_as_dict["invocation_mode"] or INVOCATION_MODES["SINGLE"]
+        )
 
         if not query or not context:
             return {"message": "Malformed completion request"}, 401
@@ -33,7 +35,9 @@ def qa(app: Any):
             elif invocation_mode == INVOCATION_MODES["COMBINED"]:
                 completion = llmc.invoke_combined(**inquiry_as_dict)
             else:
-                return {"message": "Malformed completion request, please troubleshoot invocation parameters"}, 401
+                return {
+                    "message": "Malformed completion request, please troubleshoot invocation parameters"
+                }, 401
 
             res.append(completion)
 
@@ -49,7 +53,9 @@ def qa(app: Any):
     async def qa_evals_stream(inquiry: dict):
         try:
             client = oaisvc.client
-            stream = client.chat.completions.create(messages=inquiry["messages"], model="gpt-3.5-turbo", stream=True)
+            stream = client.chat.completions.create(
+                messages=inquiry["messages"], model="gpt-3.5-turbo", stream=True
+            )
 
             async def generator():
                 for chunk in stream:
