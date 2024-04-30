@@ -8,6 +8,7 @@ from rfcllm.services.RFCService import retriever
 
 llmc = LLMController()
 
+
 def search(app: Any):
     @app.post("/search/query/ietf")
     async def search_ietf(search: SearchRequestDTO):
@@ -34,10 +35,10 @@ def search(app: Any):
         search_as_dict = search.model_dump()
         text = requests.get(search_as_dict["context"]).text
         context = search_as_dict["context"]
-        chronology = llmc.extract_chronology(**{"context":context})
+        chronology = llmc.extract_chronology(**{"context": context})
         return {
-            "refs": re.findall("(?P<url>https?://[^\\s]+)", text),
-            "chronology": chronology
+            "refs": llmc.extract_sprawl(**{"context": context}),
+            "chronology": chronology,
         }
 
     @app.post("/search/query/document")

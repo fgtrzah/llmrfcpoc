@@ -37,6 +37,27 @@ class LLMController(object):
     def invoke_combined(self):
         pass
 
+    def extract_sprawl(self, **kwargs):
+        print(kwargs)
+        context = kwargs.get("context", "")
+        url = "" if not is_url(context) else context
+        ref_text_meta = (
+            DocumentMetaDTO(**requests.get(url.replace("txt", "json")).json()) or ""
+        )
+        p = prompter.construct_prompt(
+            "Can you take every external url mentioned in this RFC and gather it into a bulletted list?",
+            ref_text_meta,
+        )
+        ctx = requests.get(url=url).text
+        messages = prompter.construct_message(p, ctx.split("[Page "))
+        completions = oaisvc.client.chat.completions.create(
+            model="gpt-4-1106-preview", messages=messages, temperature=1
+        )
+        completions = completions.choices[0].message.content.split("\n")
+        completions = [c for c in completions if c]
+        print(completions)
+        return completions
+
     def extract_chronology(self, **kwargs):
         print(kwargs)
         context = kwargs.get("context", "")
