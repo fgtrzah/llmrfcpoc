@@ -37,6 +37,27 @@ class LLMController(object):
     def invoke_combined(self):
         pass
 
+    def extract_chronology(self, **kwargs):
+        print(kwargs)
+        context = kwargs.get("context", "")
+        url = "" if not is_url(context) else context
+        ref_text_meta = (
+            DocumentMetaDTO(**requests.get(url.replace("txt", "json")).json()) or ""
+        )
+        p = prompter.construct_prompt(
+            "Can you quote the Table Of Contents and provide padding around your quote to drive emphasis?",
+            ref_text_meta,
+        )
+        ctx = requests.get(url=url).text
+        messages = prompter.construct_message(p, ctx.split("[Page "))
+        completions = oaisvc.client.chat.completions.create(
+            model="gpt-4-1106-preview", messages=messages, temperature=1
+        )
+        completions = completions.choices[0].message.content.split("\n")
+        completions = [c for c in completions if c]
+        print(completions)
+        return completions
+
     def invoke_single(self, **kwargs):
         invocation_filter = kwargs.get("invocation_filter")
         res = []
@@ -81,6 +102,7 @@ class LLMController(object):
         p = prompter.construct_prompt(query, ref_text_meta)
         ctx = requests.get(url=url).text
         messages = prompter.construct_message(p, ctx.split("[Page"))
+        print(json.dumps(messages, indent=2))
         condensed_context = oaisvc.client.chat.completions.create(
             model="gpt-4-1106-preview",
             messages=messages,
@@ -101,11 +123,12 @@ class LLMController(object):
         p = prompter.construct_prompt(query, ref_text_meta)
         ctx = requests.get(url=url).text
         messages = prompter.construct_message(p, ctx.split("[Page"))
+        print(json.dumps(messages, indent=2))
         completions = oaisvc.client.chat.completions.create(
             model="gpt-4-1106-preview",
             stream=True,
             messages=messages,
-            temperature=0,
+            temperature=1,
         )
         return completions
 
@@ -119,6 +142,7 @@ class LLMController(object):
         p = prompter.construct_prompt(query, ref_text_meta)
         ctx = requests.get(url=url).text
         messages = prompter.construct_message(p, ctx.split("[Page"))
+        print(json.dumps(messages, indent=2))
         completions = oaisvc.client.chat.completions.create(
             model="gpt-4-1106-preview",
             messages=messages,

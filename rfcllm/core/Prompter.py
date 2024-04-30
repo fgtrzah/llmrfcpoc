@@ -17,10 +17,12 @@ class Prompter(object):
                 used to answer the question. If you're unable to use
                 the contents of the document to answer the question
                 accurately, write: "Insufficient information." and if possible
-                explain why. Think through this task step by step.\n
+                explain why. Think through this task step by step. Make sure to 
+                number and chronologically arrange your chain of thought. Don't 
+                use first person.\n
             User:\n
                 \"\"\"'{}'\"\"\"
-                Question:
+                Question:\n\t\t
         """
         return prompt_template.format(ctx) + q
 
