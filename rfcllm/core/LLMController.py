@@ -41,17 +41,14 @@ class LLMController(object):
         print(kwargs)
         context = kwargs.get("context", "")
         url = "" if not is_url(context) else context
-        ref_text_meta = (
-            DocumentMetaDTO(**requests.get(url.replace("txt", "json")).json()) or ""
-        )
+        ctx = requests.get(url=url).text
         p = prompter.construct_prompt(
             "Can you take every external url mentioned in this RFC and gather it into a bulletted list?",
-            ref_text_meta,
+            ctx,
         )
-        ctx = requests.get(url=url).text
         messages = prompter.construct_message(p, ctx.split("[Page "))
         completions = oaisvc.client.chat.completions.create(
-            model="gpt-4-1106-preview", messages=messages, temperature=1
+            model="gpt-4-turbo-2024-04-09", messages=messages, temperature=1
         )
         completions = completions.choices[0].message.content.split("\n")
         completions = [c for c in completions if c]
@@ -65,14 +62,14 @@ class LLMController(object):
         ref_text_meta = (
             DocumentMetaDTO(**requests.get(url.replace("txt", "json")).json()) or ""
         )
+        ctx = requests.get(url=url).text
         p = prompter.construct_prompt(
             "Can you quote the Table Of Contents and provide padding around your quote to drive emphasis?",
-            ref_text_meta,
+            ctx,
         )
-        ctx = requests.get(url=url).text
         messages = prompter.construct_message(p, ctx.split("[Page "))
         completions = oaisvc.client.chat.completions.create(
-            model="gpt-4-1106-preview", messages=messages, temperature=1
+            model="gpt-4-turbo-2024-04-09", messages=messages, temperature=1
         )
         completions = completions.choices[0].message.content.split("\n")
         completions = [c for c in completions if c]
@@ -125,7 +122,7 @@ class LLMController(object):
         messages = prompter.construct_message(p, ctx.split("[Page"))
         print(json.dumps(messages, indent=2))
         condensed_context = oaisvc.client.chat.completions.create(
-            model="gpt-4-1106-preview",
+            model="gpt-4-turbo-2024-04-09",
             messages=messages,
         ).choices
         condensed_context = [ch.message for ch in condensed_context]
@@ -146,7 +143,7 @@ class LLMController(object):
         messages = prompter.construct_message(p, ctx.split("[Page"))
         print(json.dumps(messages, indent=2))
         completions = oaisvc.client.chat.completions.create(
-            model="gpt-4-1106-preview",
+            model="gpt-4-turbo-2024-04-09",
             stream=True,
             messages=messages,
             temperature=1,
@@ -165,7 +162,7 @@ class LLMController(object):
         messages = prompter.construct_message(p, ctx.split("[Page"))
         print(json.dumps(messages, indent=2))
         completions = oaisvc.client.chat.completions.create(
-            model="gpt-4-1106-preview",
+            model="gpt-4-turbo-2024-04-09",
             messages=messages,
         )
         return completions

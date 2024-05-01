@@ -8,7 +8,6 @@ class Prompter(object):
 
     def construct_prompt(self, q, ctx):
         prompt_template = """
-
             \nSystem:
                 You will be provided with a document delimited by triple quotes 
                 followed by the label \"Question:\"

@@ -5,16 +5,29 @@ from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
 from rfcllm.core import Prompter as prompter
-from rfcllm.evals.eval_routes import eval_routes
+from rfcllm.evals.routes import evals
 from rfcllm.group.routes import group
 from rfcllm.iam.routes import iam
 from rfcllm.qa.routes import qa
 from rfcllm.search.routes import search
 
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
+description = """
+
+RFCINDEX API is the underlying platform api powering the
+research around RFCINDEX. The API features a spectrum of
+offerings such as document search, authentication, data
+introspection, llm utilities, and cqrs which facilitates
+platform needs.
+
+Some verticals or domains worth explicitly noting:\n
+    search -> global omnisearch over rfc documents and meta data
+    qa -> closed doc contextual qa
+    evals -> evaluations of emerging research concepts around gen ai / general rapid prototyping workbench
+"""
 
 prompter = prompter.Prompter()
-app = FastAPI()
+app = FastAPI(title="RFCINDEX API", openapi_url="/api/v1/openapi.json", description=description, include_in_schema=True)
 origins = ["*"]
 
 app.add_middleware(
@@ -30,7 +43,7 @@ app = iam(app)
 app = search(app)
 app = group(app)
 app = qa(app)
-app = eval_routes(app)
+app = evals(app)
 
 # current
 if __name__ == '__main__':
