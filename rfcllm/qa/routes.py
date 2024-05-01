@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional, Union
 from fastapi.responses import StreamingResponse
 import requests
 from rfcllm.config.settings import INVOCATION_MODES
@@ -48,10 +48,11 @@ def qa(app: Any):
     @app.post("/qa/evals/stream")
     async def qa_evals_stream(inquiry: Any):
         try:
-            inquiry = inquiry.model_dump()
             client = oaisvc.client
             stream = client.chat.completions.create(
-                messages=inquiry.messages, model="gpt-4-turbo-2024-04-09", stream=True
+                messages={"messages": [{"role": "user", "content": "hello"}]},
+                model="gpt-4-turbo-2024-04-09",
+                stream=True,
             )
 
             async def generator():

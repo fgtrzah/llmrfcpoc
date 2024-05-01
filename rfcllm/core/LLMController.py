@@ -52,16 +52,11 @@ class LLMController(object):
         )
         completions = completions.choices[0].message.content.split("\n")
         completions = [c for c in completions if c]
-        print(completions)
         return completions
 
     def extract_chronology(self, **kwargs):
-        print(kwargs)
         context = kwargs.get("context", "")
         url = "" if not is_url(context) else context
-        ref_text_meta = (
-            DocumentMetaDTO(**requests.get(url.replace("txt", "json")).json()) or ""
-        )
         ctx = requests.get(url=url).text
         p = prompter.construct_prompt(
             "Can you quote the Table Of Contents and provide padding around your quote to drive emphasis?",
@@ -73,14 +68,12 @@ class LLMController(object):
         )
         completions = completions.choices[0].message.content.split("\n")
         completions = [c for c in completions if c]
-        print(completions)
         return completions
 
     def invoke_single(self, **kwargs):
         invocation_filter = kwargs.get("invocation_filter")
         res = []
 
-        # TODO: convert to infamous cmd map
         if invocation_filter == "llama2":
             res = self.llama2_qa_contigious(**kwargs)
         elif invocation_filter == "mistral":
@@ -157,15 +150,14 @@ class LLMController(object):
         ref_text_meta = (
             DocumentMetaDTO(**requests.get(url.replace("txt", "json")).json()) or ""
         )
-        p = prompter.construct_prompt(query, ref_text_meta)
         ctx = requests.get(url=url).text
+        p = prompter.construct_prompt(query, ctx)
         messages = prompter.construct_message(p, ctx.split("[Page"))
-        print(json.dumps(messages, indent=2))
-        completions = oaisvc.client.chat.completions.create(
+        completion = oaisvc.client.chat.completions.create(
             model="gpt-4-turbo-2024-04-09",
             messages=messages,
         )
-        return completions
+        return completion
 
     def cohere(self):
         pass
