@@ -38,7 +38,6 @@ class LLMController(object):
         pass
 
     def extract_sprawl(self, **kwargs):
-        print(kwargs)
         context = kwargs.get("context", "")
         p = prompter.construct_prompt(
             "Can you take every external url mentioned in this RFC and gather it into a bulletted list?",
@@ -70,6 +69,7 @@ class LLMController(object):
         invocation_filter = kwargs.get("invocation_filter")
         res = []
 
+        # fix toxicity for llama2 - its really abrasive
         if invocation_filter == "llama2":
             res = self.llama2_qa_contigious(**kwargs)
         elif invocation_filter == "mistral":
@@ -130,7 +130,6 @@ class LLMController(object):
         p = prompter.construct_prompt(query, ref_text_meta)
         ctx = requests.get(url=url).text
         messages = prompter.construct_message(p, ctx.split("[Page"))
-        print(json.dumps(messages, indent=2))
         completions = oaisvc.client.chat.completions.create(
             model="gpt-4-turbo-2024-04-09",
             stream=True,
@@ -143,9 +142,6 @@ class LLMController(object):
         context = kwargs.get("context", "")
         query = kwargs.get("query", "")
         url = "" if not is_url(context) else context
-        ref_text_meta = (
-            DocumentMetaDTO(**requests.get(url.replace("txt", "json")).json()) or ""
-        )
         ctx = requests.get(url=url).text
         p = prompter.construct_prompt(query, ctx)
         messages = prompter.construct_message(p, ctx.split("[Page"))

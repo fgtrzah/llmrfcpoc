@@ -25,7 +25,7 @@ def search(app: Any):
     async def search_rfc(
         search: SearchRequestDTO,
     ):
-        rfcid = search.dict()["query"]
+        rfcid = search.model_dump()["query"]
         prefix = rfcid[:3]
         id = rfcid[3:].lstrip("0")
         return {
@@ -45,7 +45,7 @@ def search(app: Any):
         chronology = llmc.extract_chronology(**{"context": context})
         return {
             "chronology": chronology,
-            "refs:beta": extract_urls(context)
+            "refs": extract_urls(context)
         }
 
     @app.post("/search/query/document")

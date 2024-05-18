@@ -41,7 +41,7 @@ def qa(app: Any):
 
             res.append(completion)
 
-            return {"completion": completion, "query": query, "context": context}
+            return {"completions": completion, "query": query, "context": context}
         except requests.exceptions.RequestException as e:
             return {"message": {"error": e}}
 
