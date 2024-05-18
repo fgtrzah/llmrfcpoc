@@ -5,7 +5,8 @@ from rfcllm.config.settings import DTEP, RFCEP
 from rfcllm.core.LLMController import LLMController
 from rfcllm.dto.SearchRequestDTO import SearchRequestDTO
 from rfcllm.services.RFCService import retriever
-from rfcllm.utils.validators import is_url
+from rfcllm.utils.extractors import extract_urls
+from rfcllm.utils.validators import is_url, num_tokens_from_string
 
 llmc = LLMController()
 
@@ -39,11 +40,12 @@ def search(app: Any):
         context = search_as_dict.get("context", "")
         if not context or not is_url(context):
             return {"refs": [], "chronology": []}
-        text = requests.get(url=context).text
+        url = "" if not is_url(context) else context
+        context = requests.get(url=url).text
         chronology = llmc.extract_chronology(**{"context": context})
         return {
-            "refs": llmc.extract_sprawl(**{"context": context}),
             "chronology": chronology,
+            "refs:beta": extract_urls(context)
         }
 
     @app.post("/search/query/document")

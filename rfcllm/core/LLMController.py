@@ -24,7 +24,7 @@ from rfcllm.dto.DocumentMetaDTO import DocumentMetaDTO
 from rfcllm.services.Llama2Service import Llama2Service
 from rfcllm.services.OAIService import OAIService
 from rfcllm.utils.extractors import convert_message_list_to_text
-from rfcllm.utils.validators import is_url
+from rfcllm.utils.validators import is_url, num_tokens_from_messages
 
 oaisvc = OAIService()
 llama2svc = Llama2Service()
@@ -40,31 +40,27 @@ class LLMController(object):
     def extract_sprawl(self, **kwargs):
         print(kwargs)
         context = kwargs.get("context", "")
-        url = "" if not is_url(context) else context
-        ctx = requests.get(url=url).text
         p = prompter.construct_prompt(
             "Can you take every external url mentioned in this RFC and gather it into a bulletted list?",
-            ctx,
+            context,
         )
-        messages = prompter.construct_message(p, ctx.split("[Page "))
+        messages = prompter.construct_message(p, context.split("[Page "))
         completions = oaisvc.client.chat.completions.create(
-            model="gpt-4-turbo-2024-04-09", messages=messages, temperature=1
+            model="gpt-3.5-turbo-16k", messages=messages, temperature=1
         )
         completions = completions.choices[0].message.content.split("\n")
         completions = [c for c in completions if c]
         return completions
 
     def extract_chronology(self, **kwargs):
-        context = kwargs.get("context", "")
-        url = "" if not is_url(context) else context
-        ctx = requests.get(url=url).text
+        context = kwargs.get("context", "") 
         p = prompter.construct_prompt(
             "Can you quote the Table Of Contents and provide padding around your quote to drive emphasis?",
-            ctx,
+            context,
         )
-        messages = prompter.construct_message(p, ctx.split("[Page "))
+        messages = prompter.construct_message(p, context.split("[Page "))
         completions = oaisvc.client.chat.completions.create(
-            model="gpt-4-turbo-2024-04-09", messages=messages, temperature=1
+            model="gpt-4-turbo-2024-04-09", messages=messages, temperature=1, max_tokens=2096
         )
         completions = completions.choices[0].message.content.split("\n")
         completions = [c for c in completions if c]

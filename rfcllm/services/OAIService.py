@@ -16,6 +16,6 @@ class OAIService:
     async def get_completion_stream(self, **kwargs: Any):
         completions = await self.client.chat.completions.create(
             messages=kwargs.get("messages"),
-            model="gpt-3.5-turbo",
+            model="gpt-4o"
         )
         return completions
