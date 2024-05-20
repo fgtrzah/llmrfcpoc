@@ -10,3 +10,4 @@ openai>=1.23.0
 jose
 colorama
 tiktoken
+nltk

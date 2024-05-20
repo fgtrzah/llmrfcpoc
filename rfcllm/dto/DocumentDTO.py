@@ -1,17 +1,8 @@
 from dataclasses import dataclass
-import json
-from typing import Optional
+from typing import Any, Optional, Union
+from pydantic import BaseModel
 
-from rfcllm.dto.DocumentMetaDTO import DocumentMetaDTO
-
-
-@dataclass
-class DocumentDTO:
-    page_content: Optional[str] = ""
-    metadata: Optional[DocumentMetaDTO] = None
-
-    def toJSON(self):
-        return {
-            "page_content": self.page_content,
-            "metadata": json.dumps(self.metadata or {}),
-        }
+class DocumentDTO(BaseModel):
+    data: Any
+    errors: Optional[dict] = {}
+    meta: Optional[dict] = {}

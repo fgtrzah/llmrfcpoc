@@ -5,7 +5,7 @@ from typing import Optional
 
 
 @dataclass
-class DocumentMetaDTO:
+class RFCDocumentMetaDTO:
     errata_url: None
     page_count: Optional[int] = None
     draft: Optional[str] = None

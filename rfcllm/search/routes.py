@@ -18,8 +18,15 @@ def search(app: Any):
         query = search_as_dict["query"]
         if not query:
             return {"error": "Malformed search query"}
-        res = retriever.retrieve_search_rfceietf(query=query)
-        return {"results": res}
+        res: Any = retriever.retrieve_search_rfceietf(query=query)
+        return {
+            "data": {
+                "type": "SearchQueryIETFResponse",
+                "attributes": {
+                    "results": res
+                }
+            }
+        }
 
     @app.post("/search/rfc")
     async def search_rfc(
@@ -28,10 +35,16 @@ def search(app: Any):
         rfcid = search.model_dump()["query"]
         prefix = rfcid[:3]
         id = rfcid[3:].lstrip("0")
+         
         return {
-            "result": requests.get(f"{RFCEP}{(prefix + id).lower()}.txt").text,
-            "html": requests.get(f"{RFCEP}{(prefix + id).lower()}.html").text,
-            "xml": requests.get(f"{RFCEP}{(prefix + id).lower()}.xml").text,
+            "data": {
+                "type": "SearchQueryIETFResponse",
+                "attributes": {
+                    "result": requests.get(f"{RFCEP}{(prefix + id).lower()}.txt").text,
+                    "html": requests.get(f"{RFCEP}{(prefix + id).lower()}.html").text,
+                    "xml": requests.get(f"{RFCEP}{(prefix + id).lower()}.xml").text,
+                }
+            }
         }
 
     @app.post("/search/rfc/meta")
@@ -43,9 +56,15 @@ def search(app: Any):
         url = "" if not is_url(context) else context
         context = requests.get(url=url).text
         chronology = llmc.extract_chronology(**{"context": context})
+
         return {
-            "chronology": chronology,
-            "refs": extract_urls(context)
+            "data": {
+                "type": "SearchQueryIETFResponse",
+                "attributes": {
+                    "chronology": chronology,
+                    "refs": extract_urls(context)
+                }
+            }
         }
 
     @app.post("/search/query/document")

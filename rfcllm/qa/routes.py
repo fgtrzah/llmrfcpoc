@@ -1,14 +1,13 @@
-from typing import Any, Optional, Union
+import json, uuid
+from typing import Any
 from fastapi.responses import StreamingResponse
 import requests
 from rfcllm.config.settings import INVOCATION_MODES
 from rfcllm.core.LLMController import LLMController
-from rfcllm.core.Prompter import prompter
-from rfcllm.dto.DocumentMetaDTO import DocumentMetaDTO
+from rfcllm.dto.DocumentDTO import DocumentDTO
 from rfcllm.dto.InquiryDTO import InquiryDTO
-
+from rfcllm.dto.ResourceDTO import ResourceDTO
 from rfcllm.services.OAIService import OAIService
-from rfcllm.utils.validators import is_url
 
 oaisvc = OAIService()
 llmc = LLMController()
@@ -25,13 +24,13 @@ def qa(app: Any):
         )
 
         if not query or not context:
-            return {"message": "Malformed completion request"}, 401
-
-        res = []
+            return {
+                "message": "Malformed completion request"
+            }, 401
 
         try:
             if invocation_mode == INVOCATION_MODES["SINGLE"]:
-                completion = llmc.invoke_single(**inquiry_as_dict)
+                completion: Any = llmc.invoke_single(**inquiry_as_dict)
             elif invocation_mode == INVOCATION_MODES["COMBINED"]:
                 completion = llmc.invoke_combined(**inquiry_as_dict)
             else:
@@ -39,9 +38,18 @@ def qa(app: Any):
                     "message": "Malformed completion request, please troubleshoot invocation parameters"
                 }, 401
 
-            res.append(completion)
+            return {
+                "data": {
+                    "type": "QASingleContigiousRespone",
+                    "id": str(uuid.uuid4()),
+                    "attributes": {
+                        "completions": dict(completion),
+                        "context": context,
+                        "query": query
+                    }
+                }
+            }
 
-            return {"completions": completion, "query": query, "context": context}
         except requests.exceptions.RequestException as e:
             return {"message": {"error": e}}
 

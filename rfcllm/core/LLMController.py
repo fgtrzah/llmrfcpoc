@@ -1,13 +1,7 @@
 """
 Synopsis: 
-    This class acts as the collocation of everything 
-    related to LLMS, due to exploring multi-modal poly-
-    provider use-cases (e.g. joining responses from 
-    cohere + openai + whatever else, or switching 
-    from response to response), having one 
-    central place where the api routing code
-    talks to llm(s) felt better than cramming 
-    bespoke logic inside every handler
+    Glues all the LLM invocation and routing
+    between llms.
 """
 
 """
@@ -20,11 +14,11 @@ import json
 import requests
 
 from rfcllm.core.Prompter import prompter
-from rfcllm.dto.DocumentMetaDTO import DocumentMetaDTO
+from rfcllm.dto.RFCDocumentMetaDTO import RFCDocumentMetaDTO
 from rfcllm.services.Llama2Service import Llama2Service
 from rfcllm.services.OAIService import OAIService
 from rfcllm.utils.extractors import convert_message_list_to_text
-from rfcllm.utils.validators import is_url, num_tokens_from_messages
+from rfcllm.utils.validators import is_url
 
 oaisvc = OAIService()
 llama2svc = Llama2Service()
@@ -88,7 +82,7 @@ class LLMController(object):
         query = kwargs.get("query", "")
         url = "" if not is_url(context) else context
         ref_text_meta = (
-            DocumentMetaDTO(**requests.get(url.replace("txt", "json")).json()) or ""
+            RFCDocumentMetaDTO(**requests.get(url.replace("txt", "json")).json()) or ""
         )
         p = prompter.construct_prompt(query, ref_text_meta)
         ctx = requests.get(url=url).text
@@ -104,12 +98,11 @@ class LLMController(object):
         query = kwargs.get("query", "")
         url = "" if not is_url(context) else context
         ref_text_meta = (
-            DocumentMetaDTO(**requests.get(url.replace("txt", "json")).json()) or ""
+            RFCDocumentMetaDTO(**requests.get(url.replace("txt", "json")).json()) or ""
         )
         p = prompter.construct_prompt(query, ref_text_meta)
         ctx = requests.get(url=url).text
         messages = prompter.construct_message(p, ctx.split("[Page"))
-        print(json.dumps(messages, indent=2))
         condensed_context = oaisvc.client.chat.completions.create(
             model="gpt-4-turbo-2024-04-09",
             messages=messages,
@@ -125,7 +118,7 @@ class LLMController(object):
         query = kwargs.get("query", "")
         url = "" if not is_url(context) else context
         ref_text_meta = (
-            DocumentMetaDTO(**requests.get(url.replace("txt", "json")).json()) or ""
+            RFCDocumentMetaDTO(**requests.get(url.replace("txt", "json")).json()) or ""
         )
         p = prompter.construct_prompt(query, ref_text_meta)
         ctx = requests.get(url=url).text

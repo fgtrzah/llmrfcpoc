@@ -1,18 +1,22 @@
 from rfcllm.dto import (
     PromptMessageDTO,
-    DocumentMetaDTO,
-    DocumentDTO,
+    RFCDocumentMetaDTO,
+    RFCDocumentDTO,
     InquiryDTO,
     SearchRequestDTO,
+    DocumentDTO,
+    CompoundDocumentDTO
 )
 
 PromptMessageListDTO = PromptMessageDTO.PromptMessageListDTO
 
 __all__ = [
     "PromptMessageDTO",
+    "DocumentDTO",
+    "CompoundDocumentDTO",
     "InquiryDTO",
     "SearchRequestDTO",
-    "DocumentDTO",
-    "DocumentMetaDTO",
+    "RFCDocumentDTO",
+    "RFCDocumentMetaDTO",
     "PromptMessageListDTO",
 ]
