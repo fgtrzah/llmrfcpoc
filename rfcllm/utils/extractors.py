@@ -72,16 +72,18 @@ def printf_exception(
 def pluck_urls(text=""):
     return re.findall("(?P<url>https?://[^\\s]+)", text)
 
+
 def sanitize_url(url):
-    invalid_chars = '<>|.{}\\`^'
-    if url[-1] in '.,;:!?"\'<>()[]{}|\\`~^&*#$%':
+    invalid_chars = "<>|.{}\\`^"
+    if url[-1] in ".,;:!?\"'<>()[]{}|\\`~^&*#$%":
         url = url[:-1]
-    if url[0] in '.,;:!?"\'<>()[]{}|\\`~^&*#$%':
+    if url[0] in ".,;:!?\"'<>()[]{}|\\`~^&*#$%":
         url = url[0]
     return url.strip(invalid_chars)
 
+
 def extract_urls(text):
-    url_pattern = re.compile(r'(https?://[^\s]+)')
+    url_pattern = re.compile(r"(https?://[^\s]+)")
     urls = re.findall(url_pattern, text)
     urls = [sanitize_url(u) for u in urls]
     return urls

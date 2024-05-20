@@ -46,14 +46,17 @@ class LLMController(object):
         return completions
 
     def extract_chronology(self, **kwargs):
-        context = kwargs.get("context", "") 
+        context = kwargs.get("context", "")
         p = prompter.construct_prompt(
             "Can you quote the Table Of Contents and provide padding around your quote to drive emphasis?",
             context,
         )
         messages = prompter.construct_message(p, context.split("[Page "))
         completions = oaisvc.client.chat.completions.create(
-            model="gpt-4-turbo-2024-04-09", messages=messages, temperature=1, max_tokens=2096
+            model="gpt-4-turbo-2024-04-09",
+            messages=messages,
+            temperature=1,
+            max_tokens=2096,
         )
         completions = completions.choices[0].message.content.split("\n")
         completions = [c for c in completions if c]

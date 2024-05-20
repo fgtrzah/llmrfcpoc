@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
 from rfcllm.core import Prompter as prompter
+from rfcllm.datasets.routes import datasets
 from rfcllm.evals.routes import evals
 from rfcllm.group.routes import group
 from rfcllm.iam.routes import iam
@@ -44,6 +45,7 @@ app = search(app)
 app = group(app)
 app = qa(app)
 app = evals(app)
+app = datasets(app)
 
 # current
 if __name__ == '__main__':

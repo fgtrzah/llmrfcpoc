@@ -5,12 +5,14 @@ from rfcllm.dto import (
     InquiryDTO,
     SearchRequestDTO,
     DocumentDTO,
-    CompoundDocumentDTO
+    CompoundDocumentDTO,
+    DatasetRequestDTO,
 )
 
 PromptMessageListDTO = PromptMessageDTO.PromptMessageListDTO
 
 __all__ = [
+    "DatasetRequestDTO",
     "PromptMessageDTO",
     "DocumentDTO",
     "CompoundDocumentDTO",

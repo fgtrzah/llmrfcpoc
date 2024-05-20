@@ -20,12 +20,7 @@ def search(app: Any):
             return {"error": "Malformed search query"}
         res: Any = retriever.retrieve_search_rfceietf(query=query)
         return {
-            "data": {
-                "type": "SearchQueryIETFResponse",
-                "attributes": {
-                    "results": res
-                }
-            }
+            "data": {"type": "SearchQueryIETFResponse", "attributes": {"results": res}}
         }
 
     @app.post("/search/rfc")
@@ -35,7 +30,7 @@ def search(app: Any):
         rfcid = search.model_dump()["query"]
         prefix = rfcid[:3]
         id = rfcid[3:].lstrip("0")
-         
+
         return {
             "data": {
                 "type": "SearchQueryIETFResponse",
@@ -43,7 +38,7 @@ def search(app: Any):
                     "result": requests.get(f"{RFCEP}{(prefix + id).lower()}.txt").text,
                     "html": requests.get(f"{RFCEP}{(prefix + id).lower()}.html").text,
                     "xml": requests.get(f"{RFCEP}{(prefix + id).lower()}.xml").text,
-                }
+                },
             }
         }
 
@@ -60,10 +55,7 @@ def search(app: Any):
         return {
             "data": {
                 "type": "SearchQueryIETFResponse",
-                "attributes": {
-                    "chronology": chronology,
-                    "refs": extract_urls(context)
-                }
+                "attributes": {"chronology": chronology, "refs": extract_urls(context)},
             }
         }
 

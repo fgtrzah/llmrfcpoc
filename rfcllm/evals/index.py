@@ -1,12 +1,14 @@
 def zero_shot(**kwargs):
     return None
 
+
 import textwrap, nltk
 from nltk.tokenize import sent_tokenize
+
 nltk.download("punkt")
 
-def chunk_pilot(t: str):
 
+def chunk_pilot(t: str):
 
     long_string = """
 
@@ -1871,7 +1873,7 @@ def chunk_pilot(t: str):
     sentences = sent_tokenize(long_string)
     chunks = []
     for sentence in sentences:
-      chunk = textwrap.wrap(sentence, 3000)
-      chunks.append(chunk)
+        chunk = textwrap.wrap(sentence, 3000)
+        chunks.append(chunk)
 
     print(chunks)

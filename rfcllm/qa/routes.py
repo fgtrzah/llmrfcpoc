@@ -24,9 +24,7 @@ def qa(app: Any):
         )
 
         if not query or not context:
-            return {
-                "message": "Malformed completion request"
-            }, 401
+            return {"message": "Malformed completion request"}, 401
 
         try:
             if invocation_mode == INVOCATION_MODES["SINGLE"]:
@@ -45,8 +43,8 @@ def qa(app: Any):
                     "attributes": {
                         "completions": dict(completion),
                         "context": context,
-                        "query": query
-                    }
+                        "query": query,
+                    },
                 }
             }
 

@@ -1,6 +1,7 @@
 import os
 import base64
 
+ENDPOINT = os.getenv("ENDPOINT", "https://127.0.0.1:8080/")
 SYS_SECRET_KEY = os.getenv("SYS_SECRET_KEY", "")
 SYS_SK_ALG = os.getenv("SYS_SK_ALG", "HS256")
 SYS_ACCESS_TOKEN_TTL = os.getenv("SYS_ACCESS_TOKEN_TTL", 20)
