@@ -28,6 +28,8 @@ def datasets(app):
         loc = ds.get(id)
         with open("./rfcllm/datasets/data/" + id) as f:
             r = f.read()
-        return {"data": {"type": "FileResponse", "id": loc, "content": r}}
+        return {
+            "data": {"type": "FileResponse", "id": loc, "attributes": {"content": r}}
+        }
 
     return app

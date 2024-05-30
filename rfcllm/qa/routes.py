@@ -1,12 +1,10 @@
-import json, uuid
+import uuid
 from typing import Any
 from fastapi.responses import StreamingResponse
 import requests
 from rfcllm.config.settings import INVOCATION_MODES
 from rfcllm.core.LLMController import LLMController
-from rfcllm.dto.DocumentDTO import DocumentDTO
 from rfcllm.dto.InquiryDTO import InquiryDTO
-from rfcllm.dto.ResourceDTO import ResourceDTO
 from rfcllm.services.OAIService import OAIService
 
 oaisvc = OAIService()
@@ -49,6 +47,43 @@ def qa(app: Any):
             }
 
         except requests.exceptions.RequestException as e:
+            return {"message": {"error": e}}
+
+    @app.post("/qa/prompting/ffrag")
+    def qa_prompting_ffrag(inquiry: InquiryDTO):
+        inquiry_as_dict = inquiry.model_dump()
+        query = inquiry_as_dict["query"]
+        context = inquiry_as_dict["context"]
+        invocation_mode = (
+            inquiry_as_dict["invocation_mode"] or INVOCATION_MODES["SINGLE"]
+        )
+
+        if not query or not context:
+            return {"message": "Malformed completion request"}, 401
+
+        try:
+            print(INVOCATION_MODES)
+            if invocation_mode == INVOCATION_MODES["SINGLE"]:
+                completion: Any = llmc.oai_qa_feedforward(**inquiry_as_dict)
+            else:
+                return {
+                    "message": "Malformed completion request, please troubleshoot invocation parameters"
+                }, 401
+
+            return {
+                "data": {
+                    "type": "QASingleContigiousRespone",
+                    "id": str(uuid.uuid4()),
+                    "attributes": {
+                        "completions": dict(completion),
+                        "context": context,
+                        "query": query,
+                    },
+                }
+            }
+
+        except requests.exceptions.RequestException as e:
+            print(e)
             return {"message": {"error": e}}
 
     @app.post("/qa/evals/stream")

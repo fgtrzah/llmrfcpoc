@@ -12,12 +12,14 @@ Synopsis:
 """
 import json
 import requests
-
 from rfcllm.core.Prompter import prompter
 from rfcllm.dto.RFCDocumentMetaDTO import RFCDocumentMetaDTO
 from rfcllm.services.Llama2Service import Llama2Service
 from rfcllm.services.OAIService import OAIService
-from rfcllm.utils.extractors import convert_message_list_to_text
+from rfcllm.utils.extractors import (
+    convert_message_list_to_text,
+    remove_blank_and_footer_lines,
+)
 from rfcllm.utils.validators import is_url
 
 oaisvc = OAIService()
@@ -139,8 +141,15 @@ class LLMController(object):
         query = kwargs.get("query", "")
         url = "" if not is_url(context) else context
         ctx = requests.get(url=url).text
+
+        # refactor into utility
+        ctx = remove_blank_and_footer_lines(ctx)
         p = prompter.construct_prompt(query, ctx)
-        messages = prompter.construct_message(p, ctx.split("[Page"))
+        delim = url.split("/")[-1].split(".")[0]
+        delim = delim[:3].upper() + " " + delim[3:]
+        ctx = ctx.split(delim)
+
+        messages = prompter.construct_message(p, ctx)
         completion = oaisvc.client.chat.completions.create(
             model="gpt-4-turbo-2024-04-09",
             messages=messages,
@@ -152,3 +161,29 @@ class LLMController(object):
 
     def mistral(self):
         pass
+
+    def oai_qa_feedforward(self, **kwargs):
+        # ... query extraction step ...
+        url = kwargs.get("url", "")
+
+        if not is_url(url):
+            return {
+                "message": "Malformed completion request - please provide valid context doc url"
+            }, 401
+
+        # ... llm input construction step ...
+        ctx = requests.get(url=url).text
+        ctx = remove_blank_and_footer_lines(ctx)
+        messages = prompter.construct_sysff_message(ctx)
+
+        # ... llm invocation ...
+        completions = oaisvc.client.chat.completions.create(
+            model="gpt-4-turbo",
+            messages=messages,
+            temperature=1,
+            max_tokens=200,
+            top_p=1,
+            frequency_penalty=0,
+            presence_penalty=0,
+        )
+        return completions

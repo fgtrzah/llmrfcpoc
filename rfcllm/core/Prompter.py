@@ -1,5 +1,4 @@
-from rfcllm.dto import PromptMessageListDTO
-from rfcllm.dto.PromptMessageDTO import PromptMessageDTO
+from typing import Any
 
 
 class Prompter(object):
@@ -25,7 +24,16 @@ class Prompter(object):
         """
         return prompt_template.format(ctx) + q
 
-    def construct_message(self, prompt: str = "", ctx: list[str] = []):
+    def construct_sysff_message(self, ctx: str = ""):
+        prompt_template = "System:\n\nYou're an intelligent subject matter expert specializing in comprehending RFC Documents and the standards and protocols that they put forth to govern many parts of the internet and networking best practices. You're also well versed in coming up with feed-forward style inquisitive questions designed to help bolster the understanding of the contents in an RFC document, Your task is to utilize the text delimited by \"####\" and then perform a series of procedural actions based on the context within the delimited text.\n\nEND SYSTEM INSTRUCTIONS\n\n####\n'{}'\n####\n\nTask:\nYour first task is to suggest some questions about the RFC inside #### ... #### that can help me get inspiration for what to ask, the goal is to foster efficient understanding of that RFC in the fastest way possible. Do not fabricate anything, and utilize only the text inside the delimited strings. If you don't know, explicitly state you dont know and provide a brief explanation clarifying why you can't answer.\n\nSuggested questions:"
+        return [
+            {
+                "role": "system",
+                "content": [{"text": prompt_template.format(ctx), "type": "text"}],
+            }
+        ]
+
+    def construct_message(self, prompt: str = "", ctx: list[Any] = []):
         msg = {
             "role": "system",
             "content": "You're a helpful assistant providing answers based on the following \

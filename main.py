@@ -28,7 +28,12 @@ Some verticals or domains worth explicitly noting:\n
 """
 
 prompter = prompter.Prompter()
-app = FastAPI(title="RFCINDEX API", openapi_url="/api/v1/openapi.json", description=description, include_in_schema=True)
+app = FastAPI(
+    title="RFCINDEX API",
+    openapi_url="/api/v1/openapi.json",
+    description=description,
+    include_in_schema=True,
+)
 origins = ["*"]
 
 app.add_middleware(
@@ -48,12 +53,12 @@ app = evals(app)
 app = datasets(app)
 
 # current
-if __name__ == '__main__':
+if __name__ == "__main__":
     uvicorn.run(
-        app='main:app',
+        app="main:app",
         ssl_keyfile="./fgtrz.com+3-key.pem",
         ssl_certfile="./fgtrz.com+3.pem",
-        host="127.0.0.1", 
+        host="127.0.0.1",
         port=8080,
-        reload=True
+        reload=True,
     )

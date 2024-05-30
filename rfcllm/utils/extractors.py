@@ -1,27 +1,33 @@
 from __future__ import annotations
-import json
 import re
 from typing import Any
-
-import errno
-import os
-import platform
 import re
-import stat
 import sys
-from contextlib import suppress
-from decimal import Decimal
-from enum import Enum
-from importlib.metadata import version
-from pathlib import Path
-from types import TracebackType
-from typing import Any, Callable, Literal, TextIO, cast
-
+from typing import Any, TextIO
 import colorama
 from pydantic import StrictBool
 
 INDENT = " " * 2
 HLINE = "-" * 42
+
+
+def remove_blank_and_footer_lines(file_contents):
+    """
+    Removes blank lines and lines resembling page footers from the given file contents.
+
+    Args:
+        file_contents (str): The contents of the file.
+
+    Returns:
+        str: The file contents with blank lines and page footers removed.
+    """
+    footer_pattern = r"^[A-Za-z]+\s+\w+\s+\w+\s+\[\w+\s\d+\]$"
+    lines = file_contents.split("\n")
+    filtered_lines = [
+        line for line in lines if line.strip() and not re.match(footer_pattern, line)
+    ]
+    filtered_contents = "\n".join(filtered_lines)
+    return filtered_contents
 
 
 class Style:
